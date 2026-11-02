@@ -1,0 +1,17 @@
+# Dependencies & builds
+node_modules/
+dist/
+.venv/
+__pycache__/
+*.pyc
+
+# Secrets — only the .env.example files are committed
+.env
+.env.*
+!.env.example
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
