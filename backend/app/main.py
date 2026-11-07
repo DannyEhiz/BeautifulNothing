@@ -24,6 +24,14 @@ async def lifespan(_: FastAPI):
     log.info("Sales phase: %s", config.SALES_PHASE)
     log.info("Show love → %s", config.SHOWLOVE_URL or "NOT SET (button shows 'goes live very soon')")
     log.info("Ebook     → %s", config.EBOOK_URL or "NOT SET (button shows 'goes live very soon')")
+    if config.BREVO_API_KEY and config.MAIL_FROM_EMAIL:
+        log.info("Email: sending via Brevo as %s <%s>, replies to %s",
+                 config.MAIL_FROM_NAME, config.MAIL_FROM_EMAIL, config.MAIL_REPLY_TO or config.MAIL_FROM_EMAIL)
+    else:
+        log.warning("Email: NOT configured (BREVO_API_KEY and MAIL_FROM_EMAIL needed); emails are only logged")
+    if config.BREVO_API_KEY and not config.BREVO_API_KEY.startswith("xkeysib-"):
+        log.warning("Email: BREVO_API_KEY doesn't look like a Brevo API key (should start with 'xkeysib-', not 'xsmtpsib-')")
+    log.info("Site URL: %s", config.SITE_URL)
     task = asyncio.create_task(keepalive_loop())
     yield
     task.cancel()

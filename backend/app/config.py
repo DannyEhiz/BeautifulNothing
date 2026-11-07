@@ -42,6 +42,8 @@ SECRET_KEY = _env("SECRET_KEY")
 BREVO_API_KEY = _env("BREVO_API_KEY")
 MAIL_FROM_EMAIL = _env("MAIL_FROM_EMAIL")
 MAIL_FROM_NAME = _env("MAIL_FROM_NAME", "Beautiful Nothing")
+# Where replies go (e.g. the author's personal inbox) when the sender address has no mailbox.
+MAIL_REPLY_TO = _env("MAIL_REPLY_TO")
 
 PICKUP_STORE = _env("PICKUP_STORE")
 PAPERBACK_DELIVERY_PRICE = int(_env("PAPERBACK_DELIVERY_PRICE", "12000"))

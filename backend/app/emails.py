@@ -21,23 +21,29 @@ async def send(to: list[str], subject: str, html: str) -> None:
     if not to:
         return
     if not (config.BREVO_API_KEY and config.MAIL_FROM_EMAIL):
-        log.info("EMAIL (not sent, Brevo not configured)\n  to: %s\n  subject: %s", ", ".join(to), subject)
+        log.warning("EMAIL NOT SENT (BREVO_API_KEY or MAIL_FROM_EMAIL missing) to: %s | subject: %s", ", ".join(to), subject)
         return
+    payload = {
+        "sender": {"email": config.MAIL_FROM_EMAIL, "name": config.MAIL_FROM_NAME},
+        "to": [{"email": t} for t in to],
+        "subject": subject,
+        "htmlContent": html,
+    }
+    if config.MAIL_REPLY_TO:
+        payload["replyTo"] = {"email": config.MAIL_REPLY_TO, "name": config.MAIL_FROM_NAME}
     try:
         async with httpx.AsyncClient(timeout=15) as client:
             res = await client.post(
-                BREVO_URL,
-                headers={"api-key": config.BREVO_API_KEY, "accept": "application/json"},
-                json={
-                    "sender": {"email": config.MAIL_FROM_EMAIL, "name": config.MAIL_FROM_NAME},
-                    "to": [{"email": t} for t in to],
-                    "subject": subject,
-                    "htmlContent": html,
-                },
+                BREVO_URL, headers={"api-key": config.BREVO_API_KEY, "accept": "application/json"}, json=payload
             )
-        res.raise_for_status()
     except Exception:
-        log.exception("failed to send email %r to %s", subject, to)
+        log.exception("EMAIL FAILED (could not reach Brevo) %r to %s", subject, to)
+        return
+    if res.status_code >= 400:
+        # Brevo explains the problem in the body: unverified sender, wrong key type, account not activated...
+        log.error("EMAIL FAILED (Brevo said %s): %s | subject: %r to %s", res.status_code, res.text[:500], subject, to)
+    else:
+        log.info("email sent: %r to %s", subject, to)
 
 
 # ───────────────────────── Layout ─────────────────────────
