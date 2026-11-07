@@ -1,0 +1,55 @@
+{% extends "admin/base.html" %}
+{% block admin %}
+<p><a href="/admin/orders" class="admin__back">← All orders</a></p>
+<section class="panel">
+  <p class="kicker">{{ order.created_at|date }}</p>
+  <h1 class="dialog__title">{{ order.code }} {{ badge(order.status) }}</h1>
+  <dl class="summary">
+    <div><dt>Buyer</dt><dd>{{ order.name }}</dd></div>
+    <div><dt>Phone</dt><dd><a href="tel:{{ order.phone }}">{{ order.phone }}</a> · <a href="https://wa.me/{{ whatsapp }}" target="_blank" rel="noopener noreferrer">WhatsApp</a></dd></div>
+    <div><dt>Email</dt><dd><a href="mailto:{{ order.email }}">{{ order.email }}</a></dd></div>
+    <div><dt>Copies</dt><dd>{{ order.quantity }} × {{ order.unit_price|naira }} · {{ order.fulfilment }}</dd></div>
+    {% if order.fulfilment == 'delivery' %}<div><dt>Address</dt><dd>{{ [order.address, order.area]|select|join(', ') }}</dd></div>{% endif %}
+    {% if order.note %}<div><dt>Buyer note</dt><dd>{{ order.note }}</dd></div>{% endif %}
+    {% if order.admin_note %}<div><dt>Admin note</dt><dd>{{ order.admin_note }}</dd></div>{% endif %}
+    <div class="summary__total"><dt>Total</dt><dd>{{ order.total|naira }}</dd></div>
+  </dl>
+</section>
+
+<section class="panel">
+  <h2 class="panel__title">Payment</h2>
+  {% if order.payer_name %}
+  <dl class="summary">
+    <div><dt>Paid from</dt><dd>{{ order.payer_name }} · {{ order.payer_bank }}</dd></div>
+    {% if order.payer_reference %}<div><dt>Reference</dt><dd>{{ order.payer_reference }}</dd></div>{% endif %}
+    <div><dt>Narration</dt><dd>{{ order.code }}</dd></div>
+    <div><dt>Reported</dt><dd>{{ order.payment_reported_at|date }}</dd></div>
+  </dl>
+  {% else %}
+  <p class="form__aside">The buyer hasn't said they've paid yet. Look for {{ order.total|naira }} with narration {{ order.code }}.</p>
+  {% endif %}
+</section>
+
+{% if actions %}
+<form class="panel actions" method="post" action="/admin/orders/{{ order.id }}/status">
+  <h2 class="panel__title">Next step</h2>
+  <label class="field"><span>Note <em>(optional, kept with the change)</em></span>
+    <input name="note" maxlength="500" placeholder="e.g. rider: Tunde, 0803…"></label>
+  <div class="actions__row">
+    {% for to, label, danger in actions %}
+    <button class="btn btn--sm {{ 'btn--ghost-ink' if danger else 'btn--red' }}" name="to" value="{{ to }}"
+      {% if to == 'cancelled' %}data-confirm="Cancel this order? The buyer will be emailed."{% endif %}>{{ label }}</button>
+    {% endfor %}
+  </div>
+</form>
+{% endif %}
+
+<section class="panel">
+  <h2 class="panel__title">History</h2>
+  <ol class="history">
+    {% for h in history %}
+    <li>{{ badge(h.to_status) }}<span>{{ h.created_at|date }} · {{ 'admin (from email)' if h.actor == 'admin-email' else h.actor }}</span>{% if h.note %}<em>{{ h.note }}</em>{% endif %}</li>
+    {% endfor %}
+  </ol>
+</section>
+{% endblock %}

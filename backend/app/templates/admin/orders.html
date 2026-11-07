@@ -1,0 +1,23 @@
+{% extends "admin/base.html" %}
+{% block admin %}
+<div class="chips" aria-label="Filter orders">
+  {% for key, label, n in filters %}
+  <a class="chip {{ 'is-on' if filter == key }}" href="/admin/orders?filter={{ key }}" {% if filter == key %}aria-current="true"{% endif %}>{{ label }} <span>{{ n }}</span></a>
+  {% endfor %}
+</div>
+{% if not orders %}<p class="admin__empty">No orders here.</p>{% endif %}
+<ul class="rows">
+  {% for o in orders %}
+  <li>
+    <a class="row" href="/admin/orders/{{ o.id }}">
+      <span class="row__main">
+        <span><strong>{{ o.code }}</strong> · {{ o.name }}</span>
+        <small>{{ o.quantity }} × {% if o.fulfilment == 'delivery' %}delivery{% if o.area %} ({{ o.area }}){% endif %}{% else %}pickup{% endif %} · {{ o.created_at|date }}</small>
+      </span>
+      <span class="row__amt">{{ o.total|naira }}</span>
+      {{ badge(o.status) }}
+    </a>
+  </li>
+  {% endfor %}
+</ul>
+{% endblock %}

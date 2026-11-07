@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% from "_macros.html" import error %}
+{% block title %}Order the paperback — Beautiful Nothing{% endblock %}
+
+{% block body %}
+{% include "_nav.html" %}
+<main class="page board">
+  <div class="wrap page__inner">
+    <header class="page__head">
+      <p class="kicker kicker--chalk">The paperback</p>
+      <h1 class="chalk-title">Order your copy</h1>
+      <p class="page__sub">Fill in your details, then pay by bank transfer. We'll confirm your payment and get the book to you.</p>
+    </header>
+
+    <div class="sheet">
+      <form class="form" method="post" action="/order" data-order-form
+            data-price-delivery="{{ cfg.PAPERBACK_DELIVERY_PRICE }}" data-price-pickup="{{ cfg.PAPERBACK_PICKUP_PRICE }}">
+        <fieldset class="choice">
+          <legend>How would you like to get it?</legend>
+          {% for key, label, price, note in [
+            ('delivery', 'Delivery', cfg.PAPERBACK_DELIVERY_PRICE, 'Anywhere in Lagos · delivery included'),
+            ('pickup', 'Pickup', cfg.PAPERBACK_PICKUP_PRICE, 'Collect at the store in ' ~ cfg.PICKUP_AREA)] %}
+          <label class="choice__card">
+            <input type="radio" name="fulfilment" value="{{ key }}" {% if form.fulfilment == key %}checked{% endif %}>
+            <span class="choice__top"><span class="choice__label">{{ label }}</span><span class="choice__price">{{ price|naira }}</span></span>
+            <span class="choice__note">{{ note }}</span>
+          </label>
+          {% endfor %}
+        </fieldset>
+
+        <p class="form__aside">Outside Lagos? <a href="/order/waitlist">We don't deliver there yet. Tell us where you are →</a></p>
+
+        <div class="qty">
+          <label class="qty__label" for="qty">Copies</label>
+          <div class="qty__ctrl">
+            <button type="button" data-qty="-1" aria-label="One fewer">−</button>
+            <input id="qty" name="quantity" type="number" min="1" max="20" value="{{ form.quantity or 1 }}" inputmode="numeric">
+            <button type="button" data-qty="1" aria-label="One more">+</button>
+          </div>
+        </div>
+
+        <div class="form__grid">
+          <label class="field"><span>Full name</span>
+            <input name="name" required minlength="2" maxlength="120" autocomplete="name" value="{{ form.name or '' }}"></label>
+          <label class="field"><span>Phone / WhatsApp</span>
+            <input name="phone" required minlength="7" maxlength="30" type="tel" autocomplete="tel" inputmode="tel" value="{{ form.phone or '' }}"></label>
+          <label class="field field--wide"><span>Email</span>
+            <input name="email" required type="email" autocomplete="email" inputmode="email" value="{{ form.email or '' }}">
+            <small>Your order updates and payment details will be sent here.</small></label>
+          <label class="field field--wide" data-delivery-only><span>Delivery address</span>
+            <input name="address" maxlength="300" autocomplete="street-address" placeholder="House number, street" value="{{ form.address or '' }}"></label>
+          <label class="field field--wide" data-delivery-only><span>Area in Lagos</span>
+            <input name="area" maxlength="120" placeholder="e.g. Ikeja, Lekki Phase 1, Yaba" value="{{ form.area or '' }}"></label>
+          <label class="field field--wide"><span>Note <em>(optional)</em></span>
+            <textarea name="note" maxlength="500" rows="2" placeholder="Landmark, preferred delivery time, a dedication request…">{{ form.note or '' }}</textarea></label>
+        </div>
+        <input class="hp" name="bn_check" tabindex="-1" autocomplete="off" aria-hidden="true">
+
+        <div class="total">
+          {% set price = cfg.PAPERBACK_PICKUP_PRICE if form.fulfilment == 'pickup' else cfg.PAPERBACK_DELIVERY_PRICE %}
+          {% set n = (form.quantity or 1)|int %}
+          <span><span data-total-line>{{ n }} × {{ price|naira }}</span><small data-total-note>{{ 'Pickup at the store' if form.fulfilment == 'pickup' else 'Lagos delivery included' }}</small></span>
+          <strong data-total>{{ (price * n)|naira }}</strong>
+        </div>
+
+        {{ error(error_msg) }}
+        <button class="btn btn--red btn--block" data-busy="Placing your order…">Place order &amp; see payment details</button>
+        <p class="form__fine">You'll pay by bank transfer on the next step.</p>
+      </form>
+    </div>
+  </div>
+</main>
+{% endblock %}

@@ -1,0 +1,51 @@
+{% extends "admin/base.html" %}
+{% block admin %}
+{% set c = summary.clicks or {} %}
+{% set o = summary.orders or {} %}
+{% set s = summary.supporters or {} %}
+{% if counts.to_confirm %}
+<a class="alert" href="/admin/orders?filter=action"><strong>{{ counts.to_confirm }} payment{{ 's' if counts.to_confirm > 1 }} to confirm</strong> · open orders →</a>
+{% endif %}
+
+<section class="tiles" aria-label="Site traffic">
+  {% for label, value in [('Visits', summary.visits), ('Unique visitors', summary.unique_visitors), ('Show love clicks', c.showlove_click or 0), ('Ebook clicks', c.ebook_click or 0), ('Paperback clicks', c.order_click or 0)] %}
+  <div class="tile"><span class="tile__label">{{ label }}</span><span class="tile__value">{{ '{:,}'.format(value or 0) }}</span></div>
+  {% endfor %}
+</section>
+<section class="tiles" aria-label="Sales">
+  <div class="tile"><span class="tile__label">Paperbacks confirmed</span><span class="tile__value">{{ summary.copies_confirmed or 0 }}</span></div>
+  <div class="tile"><span class="tile__label">Confirmed revenue</span><span class="tile__value">{{ summary.revenue_confirmed|naira }}</span></div>
+  <div class="tile"><span class="tile__label">Supporters</span><span class="tile__value">{{ (s.new or 0) + (s.thanked or 0) }}</span>
+    <span class="tile__note">{{ s.thanked or 0 }} thanked · {{ s.new or 0 }} to check</span></div>
+  <div class="tile"><span class="tile__label">Outside-Lagos waitlist</span><span class="tile__value">{{ summary.waitlist or 0 }}</span></div>
+</section>
+
+<section class="panel">
+  <h2 class="panel__title">Visits · last 30 days</h2>
+  {% if days|sum(attribute='n') == 0 %}
+  <p class="admin__empty">No visits recorded yet.</p>
+  {% else %}
+  {% set peak = [days|map(attribute='n')|max, 1]|max %}
+  <div class="vchart">
+    <span class="vchart__max">{{ peak }}</span>
+    <div class="vchart__bars" role="list">
+      {% for d in days %}
+      <div class="vchart__col" role="listitem" tabindex="0" aria-label="{{ d.label }}: {{ d.n }} visits" data-tip="{{ d.label }} · {{ d.n }}">
+        <span class="vchart__bar" style="height: {{ (d.n / peak * 100)|round(1) }}%"></span>
+      </div>
+      {% endfor %}
+    </div>
+    <div class="vchart__axis"><span>{{ days[0].label }}</span><span>{{ days[-1].label }}</span></div>
+  </div>
+  {% endif %}
+</section>
+
+<section class="panel">
+  <h2 class="panel__title">Orders by stage</h2>
+  <ul class="stages">
+    {% for key in STATUS_LABEL %}
+    <li>{{ badge(key) }}<span class="stages__n">{{ o[key] or 0 }}</span></li>
+    {% endfor %}
+  </ul>
+</section>
+{% endblock %}

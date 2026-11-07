@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}{{ heading }} — Beautiful Nothing{% endblock %}
+{% block body %}
+{% include "_nav.html" %}
+<main class="page board page--center">
+  <div class="wrap page__inner page__inner--narrow">
+    <div class="sheet done">
+      <h2>{{ heading }}</h2>
+      <p>{{ text }}</p>
+      <a class="btn btn--ink" href="{{ link or '/' }}">{{ link_label or 'Back to the book' }}</a>
+    </div>
+  </div>
+</main>
+{% endblock %}

@@ -1,0 +1,15 @@
+{% macro torn(color, seed) -%}
+<svg class="torn" viewBox="0 0 1440 48" preserveAspectRatio="none" aria-hidden="true"><path d="{{ torn_path(seed) }}" fill="{{ color }}"/></svg>
+{%- endmacro %}
+
+{% macro swoosh(cls='') -%}
+<svg class="swoosh {{ cls }}" viewBox="0 0 220 28" aria-hidden="true"><path d="M4 18 C 60 6, 140 4, 214 8"/><path d="M14 25 C 80 15, 150 13, 208 16"/></svg>
+{%- endmacro %}
+
+{% macro badge(status) -%}
+<span class="badge badge--{{ status }}">{{ STATUS_LABEL.get(status, status) }}</span>
+{%- endmacro %}
+
+{% macro error(msg) -%}
+{% if msg %}<p class="form__error" role="alert">{{ msg }}</p>{% endif %}
+{%- endmacro %}

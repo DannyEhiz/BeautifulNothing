@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% from "_macros.html" import error %}
+{% block title %}Order {{ order.code }} — Beautiful Nothing{% endblock %}
+
+{% set steps = [
+  ('pending_payment', 'Order placed'),
+  ('payment_submitted', 'Payment sent'),
+  ('acknowledged', 'Payment confirmed'),
+  ('dispatched', 'Out for delivery') if order.fulfilment == 'delivery' else ('ready_for_pickup', 'Ready for pickup'),
+  ('delivered', 'Delivered') if order.fulfilment == 'delivery' else ('picked_up', 'Picked up'),
+] %}
+{% set messages = {
+  'pending_payment': 'Transfer the total to one of the accounts below, then tell us which account you paid from.',
+  'payment_submitted': "Thanks! We're matching your transfer and will email you once it's confirmed.",
+  'rejected': "We couldn't find your payment yet. Please check the transfer went through, then confirm your details again.",
+  'acknowledged': 'Payment confirmed! Your copy is being prepared.',
+  'dispatched': 'Your book is on its way. Keep your phone close; the rider may call.',
+  'ready_for_pickup': 'Your copy is ready. Bring your order number to the store.',
+  'delivered': 'Delivered. Enjoy the stories!',
+  'picked_up': 'Collected. Enjoy the stories!',
+  'cancelled': 'This order was cancelled. Reply to any of our emails if this is unexpected.',
+} %}
+{% set status_for_steps = 'pending_payment' if order.status == 'rejected' else order.status %}
+{% set ns = namespace(current=0) %}
+{% for key, _ in steps %}{% if key == status_for_steps %}{% set ns.current = loop.index0 %}{% endif %}{% endfor %}
+
+{% block body %}
+{% include "_nav.html" %}
+<main class="page board">
+  <div class="wrap page__inner">
+    <header class="page__head">
+      <p class="kicker kicker--chalk">Order {{ order.code }}</p>
+      <h1 class="chalk-title">Thank you, {{ order.name.split(' ')[0] }}</h1>
+      <p class="page__sub">{{ messages[order.status] }}</p>
+    </header>
+
+    <div class="sheet">
+      {% if order.status == 'cancelled' %}
+      <p class="badge badge--muted">Cancelled</p>
+      {% else %}
+      <ol class="steps" aria-label="Order progress">
+        {% for key, label in steps %}
+        <li class="{{ 'is-done' if loop.index0 < ns.current else 'is-current' if loop.index0 == ns.current else '' }}" {% if loop.index0 == ns.current %}aria-current="step"{% endif %}>
+          <span class="steps__dot" aria-hidden="true">{{ '✓' if loop.index0 < ns.current else loop.index }}</span>
+          <span class="steps__label">{{ label }}</span>
+        </li>
+        {% endfor %}
+      </ol>
+      {% endif %}
+
+      <dl class="summary">
+        <div><dt>Order</dt><dd>{{ order.code }}</dd></div>
+        <div><dt>Copies</dt><dd>{{ order.quantity }}</dd></div>
+        <div><dt>{{ 'Deliver to' if order.fulfilment == 'delivery' else 'Pickup at' }}</dt>
+          <dd>{% if order.fulfilment == 'delivery' %}{{ [order.address, order.area]|select|join(', ') }}{% else %}{{ cfg.PICKUP_STORE }}{% endif %}</dd></div>
+        <div class="summary__total"><dt>Total</dt><dd>{{ order.total|naira }}</dd></div>
+      </dl>
+
+      {% if order.status in ('pending_payment', 'rejected') %}
+      <section class="pay">
+        <h2 class="sheet__title">1. Transfer {{ order.total|naira }}</h2>
+        <p class="form__aside">Use <strong>{{ order.code }}</strong> as the transfer narration/description so we can match it.</p>
+        <div class="banks">
+          {% for b in banks %}
+          <div class="bank">
+            <span class="bank__name">{{ b.bank_name }}</span>
+            <span class="bank__number">{{ b.account_number }}</span>
+            <span class="bank__holder">{{ b.account_name }}</span>
+            <button type="button" class="bank__copy" data-copy="{{ b.account_number }}">Copy</button>
+          </div>
+          {% endfor %}
+        </div>
+      </section>
+
+      <section class="proof">
+        <h2 class="sheet__title">2. Tell us you've paid</h2>
+        <p class="form__aside">No screenshot needed. Just tell us which account the money came from, so we can find it in our bank alerts.</p>
+        <form class="form" method="post" action="/order/{{ order.code }}/paid?t={{ token|urlencode }}">
+          <div class="form__grid">
+            <label class="field"><span>Name on the account you paid from</span>
+              <input name="payer_name" required minlength="2" maxlength="120" value="{{ form.payer_name or order.name }}"></label>
+            <label class="field"><span>Bank you paid from</span>
+              <input name="payer_bank" required minlength="2" maxlength="80" list="ng-banks" placeholder="e.g. GTBank, Opay, Kuda" value="{{ form.payer_bank or '' }}"></label>
+            <label class="field field--wide"><span>Transfer reference <em>(optional)</em></span>
+              <input name="payer_reference" maxlength="80" placeholder="Session ID or reference from your receipt" value="{{ form.payer_reference or '' }}"></label>
+          </div>
+          <datalist id="ng-banks">
+            {% for bank in ['Access Bank', 'Fidelity Bank', 'First Bank', 'FCMB', 'GTBank', 'Kuda', 'Moniepoint', 'Opay', 'PalmPay', 'Polaris Bank', 'Stanbic IBTC', 'Sterling Bank', 'UBA', 'Union Bank', 'Wema Bank', 'Zenith Bank'] %}
+            <option value="{{ bank }}">
+            {% endfor %}
+          </datalist>
+          {{ error(error_msg) }}
+          <button class="btn btn--red btn--block" data-busy="Sending…">I've sent the money</button>
+        </form>
+      </section>
+      {% elif order.status == 'payment_submitted' %}
+      <p class="form__ok" role="status">
+        Payment reported ✓ We're looking for {{ order.total|naira }} from <strong>{{ order.payer_name }}</strong>
+        ({{ order.payer_bank }}). You'll get an email once it's confirmed.
+      </p>
+      {% endif %}
+
+      <p class="form__fine">Keep this page's link (it's also in your email) to check on your order any time.</p>
+    </div>
+  </div>
+</main>
+{% endblock %}

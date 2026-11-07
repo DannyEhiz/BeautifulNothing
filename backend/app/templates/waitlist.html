@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% from "_macros.html" import error %}
+{% block title %}Outside Lagos — Beautiful Nothing{% endblock %}
+
+{% block body %}
+{% include "_nav.html" %}
+<main class="page board">
+  <div class="wrap page__inner">
+    <header class="page__head">
+      <p class="kicker kicker--chalk">The paperback</p>
+      <h1 class="chalk-title">Outside Lagos</h1>
+      <p class="page__sub">We only deliver within Lagos for now. Leave your details and we'll let you know when we can reach you.</p>
+    </header>
+    <div class="sheet">
+      {% if done %}
+      <div class="done">
+        <h2>You're on the list</h2>
+        <p>Thank you! We'll email you as soon as we can deliver to you.</p>
+        <a class="btn btn--ink" href="/">Back to the book</a>
+      </div>
+      {% else %}
+      <form class="form" method="post" action="/order/waitlist">
+        <div class="form__grid">
+          <label class="field"><span>Full name</span>
+            <input name="name" required minlength="2" maxlength="120" autocomplete="name" value="{{ form.name or '' }}"></label>
+          <label class="field"><span>City / State</span>
+            <input name="location" required minlength="2" maxlength="120" placeholder="e.g. Abuja" value="{{ form.location or '' }}"></label>
+          <label class="field"><span>Email</span>
+            <input name="email" required type="email" autocomplete="email" value="{{ form.email or '' }}"></label>
+          <label class="field"><span>Phone <em>(optional)</em></span>
+            <input name="phone" maxlength="30" type="tel" autocomplete="tel" value="{{ form.phone or '' }}"></label>
+          <label class="field"><span>Copies</span>
+            <input name="quantity" type="number" min="1" max="20" value="{{ form.quantity or 1 }}"></label>
+        </div>
+        <input class="hp" name="bn_check" tabindex="-1" autocomplete="off" aria-hidden="true">
+        {{ error(error_msg) }}
+        <button class="btn btn--red btn--block" data-busy="Saving…">Notify me</button>
+        <p class="form__fine">In Lagos? <a href="/order">Go back to ordering</a>.</p>
+      </form>
+      {% endif %}
+    </div>
+  </div>
+</main>
+{% endblock %}

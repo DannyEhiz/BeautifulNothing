@@ -1,0 +1,16 @@
+{% extends "admin/base.html" %}
+{% block admin %}
+<p class="admin__intro">People outside Lagos who want the paperback delivered.</p>
+{% if not waitlist %}<p class="admin__empty">Nobody on the waitlist yet.</p>{% endif %}
+<ul class="rows">
+  {% for w in waitlist %}
+  <li class="row row--static">
+    <span class="row__main">
+      <span><strong>{{ w.name }}</strong> · {{ w.location }}</span>
+      <small><a href="mailto:{{ w.email }}">{{ w.email }}</a>{% if w.phone %} · {{ w.phone }}{% endif %} · {{ w.created_at|date }}</small>
+    </span>
+    <span class="row__amt">{{ w.quantity }} {{ 'copies' if w.quantity > 1 else 'copy' }}</span>
+  </li>
+  {% endfor %}
+</ul>
+{% endblock %}

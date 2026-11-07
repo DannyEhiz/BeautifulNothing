@@ -1,0 +1,225 @@
+{% extends "base.html" %}
+{% from "_macros.html" import torn, swoosh, error %}
+
+{% block meta %}
+  <meta property="og:title" content="Beautiful Nothing — Stories by Oladimeji Ramon">
+  <meta property="og:description" content="Short stories where faith collides and the line between the seen and the unseen gives way.">
+  <meta property="og:image" content="{{ cfg.SITE_URL }}/static/img/books-pair.jpg">
+  <meta property="og:type" content="book">
+  <link rel="preload" as="image" href="/static/img/book-3d.webp">
+{% endblock %}
+{% block body_attrs %}data-track-visit{% endblock %}
+
+{% block body %}
+{% include "_nav.html" %}
+
+<header class="hero board">
+  <div class="scribbles" aria-hidden="true" data-scribbles></div>
+  <div class="wrap hero__inner">
+    <div class="hero__copy">
+      <p class="eyebrow"><span class="eyebrow__dot"></span> Out now · A debut collection</p>
+      <h1 class="hero__title">
+        <span class="hero__line">Beautiful</span>
+        <span class="hero__line">Nothing</span>
+      </h1>
+      <p class="hero__stories">Stories{{ swoosh() }}</p>
+      <p class="hero__lede">Where faith collides, and the line between the physical and the spiritual quietly gives way.</p>
+      <div class="hero__ctas">
+        <a class="btn btn--red" href="#get">Get the book</a>
+        <a class="btn btn--ghost" href="#stories">Meet the stories</a>
+      </div>
+      <p class="hero__prices">
+        {% if cfg.SALES_PHASE == 'launch' %}Show love from {{ cfg.LAUNCH_GIFT_MINIMUM|naira }}{% else %}Ebook {{ cfg.EBOOK_PRICE|naira }}{% endif %}
+        <span aria-hidden="true"> · </span>
+        Paperback {{ cfg.PAPERBACK_DELIVERY_PRICE|naira }}, delivered in Lagos
+      </p>
+    </div>
+    <div class="hero__book" data-tilt>
+      <img src="/static/img/book-3d.webp" alt="Beautiful Nothing by Oladimeji Ramon, hardback cover" width="487" height="863" fetchpriority="high">
+      <span class="hero__shadow" aria-hidden="true"></span>
+    </div>
+  </div>
+  <a class="hero__scroll" href="#book" aria-label="Scroll to read about the book"><span>scroll</span></a>
+</header>
+
+<main>
+  <section id="book" class="section paper">
+    {{ torn('var(--paper)', 11) }}
+    <div class="wrap about">
+      <p class="kicker" data-reveal>The book</p>
+      <h2 class="statement" data-reveal>
+        Between what we believe and what we see, there is a passage. <em>These stories walk it.</em>
+      </h2>
+      <div class="about__body" data-reveal>
+        <p class="dropcap"><em>Beautiful Nothing</em> is a collection of short stories exploring the clash of faith and the blurred line between the physical and the spiritual.</p>
+        <p>Across its varied tales, the characters are confronted with experiences that unsettle their beliefs, leaving them grappling with the possibility of alternative realities beyond what the eyes can see.</p>
+      </div>
+      <dl class="facts" data-reveal>
+        <div><dt>Form</dt><dd>Short stories</dd></div>
+        <div><dt>Worlds</dt><dd>Nigeria &amp; London</dd></div>
+        <div><dt>Editions</dt><dd>Ebook &amp; paperback</dd></div>
+        <div><dt>Author</dt><dd>Oladimeji Ramon</dd></div>
+      </dl>
+    </div>
+  </section>
+
+  <section id="stories" class="section board">
+    {{ torn('var(--board)', 23) }}
+    <div class="wrap">
+      <header class="section-head" data-reveal>
+        <p class="kicker kicker--chalk">Inside</p>
+        <h2 class="chalk-title">Three doors into the book</h2>
+        <p class="section-head__sub">A glimpse of three of the tales waiting inside.</p>
+      </header>
+      <div class="notes">
+        {% for s in stories %}
+        <article class="note" style="--tilt: {{ s.tilt }}deg; --d: {{ loop.index0 * 90 }}ms" data-reveal>
+          <span class="note__tape" aria-hidden="true"></span>
+          <span class="note__num" aria-hidden="true">{{ s.num }}</span>
+          <p class="note__kicker">{{ s.kicker }}</p>
+          <h3 class="note__title">{{ s.title }}</h3>
+          <p class="note__text">{{ s.text }}</p>
+          <p class="note__scrawl" aria-hidden="true">{{ s.scrawl }}</p>
+        </article>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+
+  <section class="wall board" aria-label="A question from the book">
+    <div class="wall__scrawl" aria-hidden="true">
+      {% for line in wall %}<span style="--i: {{ loop.index0 }}">{{ line }}</span>{% endfor %}
+    </div>
+    <div class="wrap wall__inner" data-reveal>
+      <p class="wall__q">Are the writings mere ramblings of a troubled mind,<br><em>or a code carrying a message?</em></p>
+    </div>
+  </section>
+
+  <section class="section paper praise">
+    {{ torn('var(--paper)', 41) }}
+    <figure class="wrap praise__fig" data-reveal>
+      <span class="praise__mark" aria-hidden="true">“</span>
+      <blockquote>
+        Reading <em>Beautiful Nothing</em> feels like listening to stories told by someone with a deep connection to
+        their roots. Ramon has a real gift for creating compelling characters and drawing the reader into their world.
+      </blockquote>
+      <figcaption><strong>Akin Akingbogun</strong><span>author of <em>Damaged Goods</em></span></figcaption>
+    </figure>
+  </section>
+
+  <section id="author" class="section board author">
+    {{ torn('var(--board)', 57) }}
+    <div class="wrap author__grid">
+      <figure class="polaroid" data-reveal>
+        <span class="polaroid__tape" aria-hidden="true"></span>
+        <img src="/static/img/oladimeji-ramon.jpg" alt="Portrait of Oladimeji Ramon" width="1041" height="1280" loading="lazy">
+        <figcaption>Oladimeji Ramon</figcaption>
+      </figure>
+      <div class="author__copy">
+        <p class="kicker kicker--chalk" data-reveal>The author</p>
+        <h2 class="chalk-title" data-reveal>Oladimeji Ramon</h2>
+        <p class="author__tag" data-reveal>Journalist. Storyteller. Painter. <span>Once, a veterinary surgeon.</span></p>
+        <p class="author__bio" data-reveal>
+          Oladimeji Ramon is an award-winning journalist, fiction writer and part-time painter. He trained as a
+          veterinary surgeon at the University of Ibadan and worked in veterinary practice for five years before
+          switching careers in 2014 to pursue his lifelong passion for writing. He served as News Editor at
+          <em>The PUNCH</em> newspaper and currently writes for <em>The Africa Report</em>, headquartered in Paris,
+          France. <em>Beautiful Nothing</em> marks his debut in fiction.
+        </p>
+        <ol class="timeline" data-reveal>
+          {% for when, what in timeline %}
+          <li><span class="timeline__when">{{ when }}</span><span class="timeline__what">{{ what }}</span></li>
+          {% endfor %}
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <section id="get" class="section sand get">
+    {{ torn('var(--sand)', 73) }}
+    <div class="wrap get__grid">
+      <div class="get__visual" data-reveal>
+        <img src="/static/img/books-pair.jpg" alt="Two copies of Beautiful Nothing standing side by side" width="1213" height="1280" loading="lazy">
+      </div>
+      <div class="get__copy">
+        <p class="kicker" data-reveal>Get your copy</p>
+        <h2 class="get__title" data-reveal>Two ways in.</h2>
+        <p class="get__sub" data-reveal>Read it tonight on your screen, or hold it in your hands.</p>
+
+        <div class="options">
+          {% if cfg.SALES_PHASE == 'launch' %}
+          <article class="option" data-reveal>
+            <header class="option__head">
+              <span class="option__label">Show love</span>
+              <span class="option__price option__price--sm">from {{ cfg.LAUNCH_GIFT_MINIMUM|naira }}</span>
+            </header>
+            <p class="option__desc">Celebrate the launch with a gift to the author, and receive the ebook as a thank-you.</p>
+            <button class="btn btn--ink btn--block" type="button" data-open-dialog="love">Show love <span aria-hidden="true">❤</span></button>
+            <p class="option__note">Sent securely through Selar.</p>
+          </article>
+          {% else %}
+          <article class="option" data-reveal>
+            <header class="option__head">
+              <span class="option__label">Ebook</span>
+              <span class="option__price">{{ cfg.EBOOK_PRICE|naira }}</span>
+            </header>
+            <p class="option__desc">Instant access through Selar. Start reading in minutes.</p>
+            <a class="btn btn--ink btn--block" href="{{ cfg.EBOOK_URL or '#get' }}" {% if cfg.EBOOK_URL %}target="_blank" rel="noopener noreferrer"{% else %}data-soon="The ebook link goes live very soon. Please check back shortly."{% endif %} data-track="ebook_click">
+              Buy on Selar <span aria-hidden="true">↗</span>
+            </a>
+            <p class="option__note" aria-live="polite" data-soon-note>Read on your phone, tablet or laptop.</p>
+          </article>
+          {% endif %}
+
+          <article class="option option--dark" data-reveal style="--d: 90ms">
+            <span class="option__badge">Lagos delivery</span>
+            <header class="option__head">
+              <span class="option__label">Paperback</span>
+              <span class="option__price">{{ cfg.PAPERBACK_DELIVERY_PRICE|naira }}</span>
+            </header>
+            <p class="option__desc">Delivered to your door anywhere in Lagos, or {{ cfg.PAPERBACK_PICKUP_PRICE|naira }} if you pick it up in {{ cfg.PICKUP_AREA }}.</p>
+            <a class="btn btn--red btn--block" href="/order" data-track="order_click">Order the paperback <span aria-hidden="true">→</span></a>
+            <p class="option__note">Pay by bank transfer. Details on the next page.</p>
+          </article>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+{% include "_footer.html" %}
+
+{% if cfg.SALES_PHASE == 'launch' %}
+<dialog class="dialog" id="dialog-love" {% if love_state %}data-open-on-load{% endif %}>
+  <div class="dialog__panel">
+    <button class="dialog__close" type="button" data-close-dialog aria-label="Close">×</button>
+    <p class="kicker">Show love</p>
+    <h2 class="dialog__title">Thank you for supporting the launch</h2>
+    {% if love_state == 'saved' %}
+    <div class="dialog__done">
+      <p>We've saved your details. The ShowLove page goes live very soon. Please come back and complete your gift then.</p>
+      <button class="btn btn--ink btn--block" type="button" data-close-dialog>Close</button>
+    </div>
+    {% else %}
+    <form class="form" method="post" action="/show-love" data-track-submit="showlove_click">
+      <p class="dialog__lede">
+        Tell us who you are so the author can thank you personally. Gifts of
+        <strong>{{ cfg.LAUNCH_GIFT_MINIMUM|naira }} or more</strong> come with the ebook as a thank-you. Next, you'll go
+        to Selar to send your gift.
+      </p>
+      <label class="field"><span>Your name</span>
+        <input name="name" required maxlength="120" autocomplete="name" value="{{ love_form.name or '' }}"></label>
+      <label class="field"><span>Email</span>
+        <input name="email" type="email" required autocomplete="email" inputmode="email" value="{{ love_form.email or '' }}">
+        <small>We'll send your thank-you (and the ebook) here.</small></label>
+      <input class="hp" name="bn_check" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <input type="hidden" name="visitor_id" data-visitor-id>
+      {{ error(love_error) }}
+      <button class="btn btn--red btn--block" data-busy="One moment…">Continue to Selar ↗</button>
+      <p class="form__fine">Payment is handled securely by Selar.</p>
+    </form>
+    {% endif %}
+  </div>
+</dialog>
+{% endif %}
+{% endblock %}

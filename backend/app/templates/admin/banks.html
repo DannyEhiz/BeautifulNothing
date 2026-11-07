@@ -1,0 +1,27 @@
+{% extends "admin/base.html" %}
+{% block admin %}
+<p class="admin__intro">Active accounts are shown to paperback buyers and included in their payment email.</p>
+<ul class="rows">
+  {% for b in banks %}
+  <li class="row row--static {{ '' if b.is_active else 'is-off' }}">
+    <span class="row__main">
+      <span><strong>{{ b.bank_name }}</strong> · {{ b.account_number }}</span>
+      <small>{{ b.account_name }}{% if b.account_type %} · {{ b.account_type }}{% endif %}</small>
+    </span>
+    <form method="post" action="/admin/banks/{{ b.id }}/toggle">
+      <button class="btn btn--sm {{ 'btn--ghost-ink' if b.is_active else 'btn--red' }}">{{ 'Hide from buyers' if b.is_active else 'Show to buyers' }}</button>
+    </form>
+  </li>
+  {% endfor %}
+</ul>
+<form class="panel form" method="post" action="/admin/banks">
+  <h2 class="panel__title">Add an account</h2>
+  <div class="form__grid">
+    <label class="field"><span>Bank</span><input name="bank_name" required minlength="2" maxlength="80"></label>
+    <label class="field"><span>Account number</span><input name="account_number" required minlength="6" maxlength="20" inputmode="numeric"></label>
+    <label class="field"><span>Account name</span><input name="account_name" required minlength="2" maxlength="120"></label>
+    <label class="field"><span>Type <em>(optional)</em></span><input name="account_type" maxlength="40" placeholder="Savings / Current"></label>
+  </div>
+  <button class="btn btn--ink" data-busy="Adding…">Add account</button>
+</form>
+{% endblock %}

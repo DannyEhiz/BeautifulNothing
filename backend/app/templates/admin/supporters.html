@@ -1,0 +1,29 @@
+{% extends "admin/base.html" %}
+{% block admin %}
+<p class="admin__intro">
+  People who clicked <em>Show love</em> and left their details before going to Selar. Selar doesn't tell us who actually
+  paid, so match names against your ShowLove dashboard, then <strong>Thank</strong> (sends the thank-you email and ebook
+  link) or <strong>Dismiss</strong>.
+</p>
+{% if not supporters %}<p class="admin__empty">No supporters yet.</p>{% endif %}
+<ul class="rows">
+  {% for s in supporters %}
+  <li class="row row--static">
+    <span class="row__main">
+      <strong>{{ s.name }}</strong>
+      <small><a href="mailto:{{ s.email }}">{{ s.email }}</a> · {{ s.created_at|date }}</small>
+    </span>
+    {% if s.status == 'new' %}
+    <span class="row__actions">
+      <form method="post" action="/admin/supporters/{{ s.id }}/thank"><button class="btn btn--sm btn--red" data-confirm="Send the thank-you email (and ebook link) to {{ s.name }}? Only do this once you've seen their gift on Selar ShowLove.">Thank</button></form>
+      <form method="post" action="/admin/supporters/{{ s.id }}/dismiss"><button class="btn btn--sm btn--ghost-ink">Dismiss</button></form>
+    </span>
+    {% elif s.status == 'thanked' %}
+    <span class="badge badge--delivered">Thanked {{ s.thanked_at|date }}</span>
+    {% else %}
+    <span class="badge badge--cancelled">Dismissed</span>
+    {% endif %}
+  </li>
+  {% endfor %}
+</ul>
+{% endblock %}

@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% from "_macros.html" import badge, error %}
+{% block title %}Admin — Beautiful Nothing{% endblock %}
+{% block head %}<meta name="robots" content="noindex">{% endblock %}
+
+{% block body %}
+<div class="admin">
+  <header class="admin__bar">
+    <div class="wrap admin__bar-inner">
+      <a href="/" class="nav__brand">Beautiful Nothing</a>
+      <span class="admin__tag">Admin</span>
+      <form method="post" action="/admin/logout" class="admin__logout"><button class="linkish">Sign out</button></form>
+    </div>
+    <nav class="wrap admin__tabs" aria-label="Admin sections">
+      {% for key, label, href in [('overview', 'Overview', '/admin'), ('orders', 'Orders', '/admin/orders'), ('supporters', 'Show love', '/admin/supporters'), ('waitlist', 'Waitlist', '/admin/waitlist'), ('banks', 'Bank accounts', '/admin/banks'), ('guide', 'Guide', '/admin/guide')] %}
+      <a class="admin__tab {{ 'is-on' if tab == key }}" href="{{ href }}" {% if tab == key %}aria-current="page"{% endif %}>
+        {{ label }}
+        {% if key == 'orders' and counts.to_confirm %}<span class="pill">{{ counts.to_confirm }}</span>{% endif %}
+        {% if key == 'supporters' and counts.new_supporters %}<span class="pill pill--muted">{{ counts.new_supporters }}</span>{% endif %}
+      </a>
+      {% endfor %}
+    </nav>
+  </header>
+  <main class="wrap admin__main">
+    {% if notice %}<p class="form__ok" role="status">{{ notice }}</p>{% endif %}
+    {{ error(error_msg) }}
+    {% block admin %}{% endblock %}
+  </main>
+</div>
+{% endblock %}

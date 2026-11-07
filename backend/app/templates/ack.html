@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% from "_macros.html" import error, badge %}
+{% block title %}Acknowledge {{ order.code }} — Beautiful Nothing{% endblock %}
+
+{% block body %}
+<main class="page board page--center">
+  <div class="wrap page__inner page__inner--narrow">
+    <p class="kicker kicker--chalk">Admin · Acknowledge order</p>
+    <div class="sheet">
+      <h1 class="sheet__title sheet__title--lg">{{ order.code }}</h1>
+      <p class="form__aside">Look for this transfer in your bank alerts:</p>
+      <dl class="summary">
+        <div class="summary__total"><dt>Amount</dt><dd>{{ order.total|naira }}</dd></div>
+        <div><dt>From</dt><dd>{{ order.payer_name or '—' }}{% if order.payer_bank %} · {{ order.payer_bank }}{% endif %}</dd></div>
+        {% if order.payer_reference %}<div><dt>Reference</dt><dd>{{ order.payer_reference }}</dd></div>{% endif %}
+        <div><dt>Narration</dt><dd>{{ order.code }}</dd></div>
+        <div><dt>Buyer</dt><dd>{{ order.name }} · <a href="tel:{{ order.phone }}">{{ order.phone }}</a></dd></div>
+        <div><dt>Copies</dt><dd>{{ order.quantity }} · {{ 'Delivery' if order.fulfilment == 'delivery' else 'Pickup' }}</dd></div>
+        {% if order.fulfilment == 'delivery' %}<div><dt>Address</dt><dd>{{ [order.address, order.area]|select|join(', ') }}</dd></div>{% endif %}
+      </dl>
+
+      {% if result == 'done' %}
+      <p class="form__ok" role="status">Acknowledged ✓ The buyer has been emailed and the order is queued for supply.</p>
+      {% elif can_acknowledge %}
+      {{ error(error_msg) }}
+      <form method="post" action="/ack">
+        <input type="hidden" name="token" value="{{ token }}">
+        <button class="btn btn--red btn--block" data-busy="Acknowledging…">Acknowledge — payment received</button>
+      </form>
+      {% else %}
+      <p class="form__ok" role="status">This order is already past that step: {{ badge(order.status) }}</p>
+      {% endif %}
+      <a class="btn btn--ghost-ink btn--block" href="/admin/orders/{{ order.id }}">Open in admin</a>
+    </div>
+  </div>
+</main>
+{% endblock %}

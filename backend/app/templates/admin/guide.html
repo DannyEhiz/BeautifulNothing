@@ -1,0 +1,313 @@
+{% extends "admin/base.html" %}
+{% from "_macros.html" import badge %}
+{% block title %}How it works — Admin — Beautiful Nothing{% endblock %}
+{% block head %}{{ super() }}<link rel="stylesheet" href="/static/css/guide.css">{% endblock %}
+
+{% macro icon(name) -%}
+<svg class="gi" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+{%- if name == 'heart' %}<path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/>
+{%- elif name == 'tablet' %}<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M10 18h4"/>
+{%- elif name == 'box' %}<path d="M3 7.5 12 3l9 4.5v9L12 21l-9-4.5z"/><path d="M3 7.5 12 12l9-4.5M12 12v9"/>
+{%- elif name == 'bell' %}<path d="M6 16V11a6 6 0 1 1 12 0v5l1.5 2h-15z"/><path d="M10 20a2 2 0 0 0 4 0"/>
+{%- elif name == 'bank' %}<path d="M3 9 12 4l9 5M5 10v7M9.5 10v7M14.5 10v7M19 10v7M3 20h18"/>
+{%- elif name == 'scale' %}<path d="M12 4v16M5 20h14M5 8h14M7 8l-3 6a3 3 0 0 0 6 0zM17 8l-3 6a3 3 0 0 0 6 0z"/>
+{%- elif name == 'truck' %}<path d="M3 6h11v9H3zM14 9h4l3 3v3h-7"/><circle cx="7" cy="17.5" r="1.8"/><circle cx="17" cy="17.5" r="1.8"/>
+{%- elif name == 'store' %}<path d="M4 9h16l-1.5-5h-13zM5 9v11h14V9M9.5 20v-6h5v6"/>
+{%- elif name == 'mail' %}<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m4 7 8 6 8-6"/>
+{%- elif name == 'shield' %}<path d="M12 3 5 6v6c0 4.5 3 7.5 7 9 4-1.5 7-4.5 7-9V6z"/><path d="m9 12 2 2 4-4"/>
+{%- elif name == 'map' %}<path d="M12 21s-6-5.2-6-10a6 6 0 1 1 12 0c0 4.8-6 10-6 10z"/><circle cx="12" cy="11" r="2"/>
+{%- elif name == 'sun' %}<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>
+{%- elif name == 'check' %}<path d="m5 12.5 4.5 4.5L19 7.5"/>
+{%- elif name == 'x' %}<path d="M6 6l12 12M18 6 6 18"/>
+{%- elif name == 'alert' %}<path d="M12 3 2 20h20zM12 10v4M12 17h.01"/>
+{%- elif name == 'chat' %}<path d="M4 5h16v11H9l-5 4z"/>
+{%- elif name == 'arrow' %}<path d="M5 12h14M13 6l6 6-6 6"/>
+{%- endif -%}
+</svg>
+{%- endmacro %}
+
+{% block admin %}
+<article class="guide">
+
+  {# ───────── Hero ───────── #}
+  <header class="g-hero">
+    <div class="g-hero__text">
+      <p class="g-eyebrow">Admin guide</p>
+      <h1 class="g-hero__title">How the site works</h1>
+      <p class="g-hero__lede">Everything that happens when someone buys the book, and exactly how you check and fulfil each order.</p>
+      <span class="g-phase {{ 'is-launch' if cfg.SALES_PHASE == 'launch' }}">
+        <span class="g-phase__dot"></span>{{ 'Launch phase: Show love is live' if cfg.SALES_PHASE == 'launch' else 'After launch: ebook sales on Selar' }}
+      </span>
+    </div>
+    <div class="g-prices">
+      <div class="g-price">
+        <span class="g-price__icon">{{ icon('truck') }}</span>
+        <span class="g-price__label">Paperback · delivered</span>
+        <span class="g-price__value">{{ cfg.PAPERBACK_DELIVERY_PRICE|naira }}</span>
+        <span class="g-price__note">Lagos only, delivery included</span>
+      </div>
+      <div class="g-price">
+        <span class="g-price__icon">{{ icon('store') }}</span>
+        <span class="g-price__label">Paperback · pickup</span>
+        <span class="g-price__value">{{ cfg.PAPERBACK_PICKUP_PRICE|naira }}</span>
+        <span class="g-price__note">{{ cfg.PICKUP_AREA }}</span>
+      </div>
+      <div class="g-price">
+        <span class="g-price__icon">{{ icon('heart') }}</span>
+        <span class="g-price__label">{{ 'Show love gift' if cfg.SALES_PHASE == 'launch' else 'Ebook' }}</span>
+        <span class="g-price__value">{% if cfg.SALES_PHASE == 'launch' %}{{ cfg.LAUNCH_GIFT_MINIMUM|naira }}+{% else %}{{ cfg.EBOOK_PRICE|naira }}{% endif %}</span>
+        <span class="g-price__note">{{ 'Gifters get the ebook' if cfg.SALES_PHASE == 'launch' else 'Sold and delivered by Selar' }}</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="g-layout">
+    <nav class="g-toc" aria-label="On this page">
+      <p class="g-toc__title">On this page</p>
+      <a href="#who-pays">Who pays where</a>
+      <a href="#paperback">Paperback orders</a>
+      <a href="#stages">Order stages</a>
+      <a href="#show-love">Show love gifts</a>
+      <a href="#ebook">Ebook &amp; waitlist</a>
+      <a href="#routine">Daily routine</a>
+    </nav>
+
+    <div class="g-main">
+
+      {# ───────── Who pays where ───────── #}
+      <section class="g-section" id="who-pays">
+        <h2 class="g-h2">Who pays where</h2>
+        <div class="g-cards g-cards--3">
+          <div class="g-card">
+            <span class="g-card__icon g-tone--rose">{{ icon('heart') }}</span>
+            <h3>Show love gifter</h3>
+            <p class="g-muted">During the launch</p>
+            <dl class="g-mini">
+              <div><dt>Pays on</dt><dd>Selar ShowLove page</dd></div>
+              <div><dt>Confirmed by</dt><dd><span class="g-tag g-tag--you">You · check Selar</span></dd></div>
+            </dl>
+          </div>
+          <div class="g-card">
+            <span class="g-card__icon g-tone--blue">{{ icon('tablet') }}</span>
+            <h3>Ebook buyer</h3>
+            <p class="g-muted">After the launch</p>
+            <dl class="g-mini">
+              <div><dt>Pays on</dt><dd>Selar product page</dd></div>
+              <div><dt>Confirmed by</dt><dd><span class="g-tag g-tag--auto">Selar · automatic</span></dd></div>
+            </dl>
+          </div>
+          <div class="g-card">
+            <span class="g-card__icon g-tone--ink">{{ icon('box') }}</span>
+            <h3>Paperback buyer</h3>
+            <p class="g-muted">Any time</p>
+            <dl class="g-mini">
+              <div><dt>Pays by</dt><dd>Bank transfer to you</dd></div>
+              <div><dt>Confirmed by</dt><dd><span class="g-tag g-tag--you">You · check your bank</span></dd></div>
+            </dl>
+          </div>
+        </div>
+      </section>
+
+      {# ───────── Paperback ───────── #}
+      <section class="g-section" id="paperback">
+        <h2 class="g-h2">Paperback orders, step by step</h2>
+
+        <div class="g-rule">
+          <span class="g-rule__icon">{{ icon('shield') }}</span>
+          <div>
+            <p class="g-rule__kicker">The golden rule</p>
+            <p class="g-rule__text">Only money showing in <strong>your bank account</strong> counts. Never a message, never a screenshot.</p>
+          </div>
+        </div>
+
+        <h3 class="g-h3">What the buyer does</h3>
+        <ol class="g-journey">
+          <li><span class="g-journey__n">1</span><p>Chooses <strong>Delivery</strong> ({{ cfg.PAPERBACK_DELIVERY_PRICE|naira }}) or <strong>Pickup</strong> ({{ cfg.PAPERBACK_PICKUP_PRICE|naira }})</p></li>
+          <li><span class="g-journey__n">2</span><p>Enters name, phone, email (and address) and places the order</p></li>
+          <li><span class="g-journey__n">3</span><p>Gets an order code like <span class="g-code">BN-0007</span> + your bank details</p></li>
+          <li><span class="g-journey__n">4</span><p>Transfers the money with <span class="g-code">BN-0007</span> as narration</p></li>
+          <li><span class="g-journey__n">5</span><p>Taps <strong>"I've sent the money"</strong> with the payer's name &amp; bank</p></li>
+        </ol>
+
+        <h3 class="g-h3">What you do</h3>
+        <ol class="g-steps">
+          <li class="g-step">
+            <span class="g-step__marker">{{ icon('bell') }}</span>
+            <div class="g-step__body">
+              <p class="g-step__n">Step 1</p>
+              <h4>Get notified</h4>
+              <p>A <strong>"New order"</strong> email arrives when someone orders (just for information). When they say they've paid, you get <strong>"Payment to confirm"</strong>:</p>
+              <div class="g-email">
+                <div class="g-email__bar"><span>{{ icon('mail') }}</span><strong>Payment to confirm: BN-0007</strong></div>
+                <div class="g-email__body">
+                  <p>Look for this transfer before acknowledging:</p>
+                  <dl class="g-email__facts">
+                    <div><dt>Amount</dt><dd>₦24,000</dd></div>
+                    <div><dt>From</dt><dd>ADEYEMI BOLA · Opay</dd></div>
+                    <div><dt>Narration</dt><dd>BN-0007</dd></div>
+                  </dl>
+                  <span class="g-fakebtn">Acknowledge order</span>
+                </div>
+              </div>
+            </div>
+          </li>
+
+          <li class="g-step g-step--key">
+            <span class="g-step__marker">{{ icon('bank') }}</span>
+            <div class="g-step__body">
+              <p class="g-step__n">Step 2 · the important one</p>
+              <h4>Check the money really arrived</h4>
+              <p>Open your bank app and find a credit where all of these match:</p>
+              <div class="g-checks">
+                <div class="g-check"><span>{{ icon('check') }}</span><strong>Amount</strong><small>Exactly copies × price</small></div>
+                <div class="g-check"><span>{{ icon('check') }}</span><strong>Sender name</strong><small>Same as the name they gave</small></div>
+                <div class="g-check"><span>{{ icon('check') }}</span><strong>Narration</strong><small>Order code (some banks hide it)</small></div>
+                <div class="g-check"><span>{{ icon('check') }}</span><strong>Date</strong><small>After the order was placed</small></div>
+              </div>
+            </div>
+          </li>
+
+          <li class="g-step">
+            <span class="g-step__marker">{{ icon('scale') }}</span>
+            <div class="g-step__body">
+              <p class="g-step__n">Step 3</p>
+              <h4>Decide</h4>
+              <div class="g-outcomes">
+                <div class="g-outcome g-outcome--good">
+                  <p class="g-outcome__when">{{ icon('check') }} Money is there, amount is right</p>
+                  <p class="g-outcome__do">Tap <strong>Acknowledge order</strong> in the email (then confirm), or <strong>Acknowledge payment</strong> on the order page.</p>
+                  <p class="g-outcome__then">Buyer gets "Payment confirmed"</p>
+                </div>
+                <div class="g-outcome g-outcome--warn">
+                  <p class="g-outcome__when">{{ icon('x') }} No matching payment</p>
+                  <p class="g-outcome__do">Open the order and click <strong>Payment not found</strong>.</p>
+                  <p class="g-outcome__then">Buyer is asked to check and confirm again</p>
+                </div>
+                <div class="g-outcome g-outcome--bad">
+                  <p class="g-outcome__when">{{ icon('alert') }} Wrong amount (e.g. underpaid)</p>
+                  <p class="g-outcome__do">Message them with the <strong>WhatsApp</strong> link on the order page. <strong>Don't acknowledge</strong> until the full amount arrives.</p>
+                  <p class="g-outcome__then">Nothing is sent until you act</p>
+                </div>
+                <div class="g-outcome g-outcome--info">
+                  <p class="g-outcome__when">{{ icon('bank') }} Money arrived, but they never reported it</p>
+                  <p class="g-outcome__do">You can still click <strong>Acknowledge payment</strong> on the order.</p>
+                  <p class="g-outcome__then">Buyer gets "Payment confirmed"</p>
+                </div>
+              </div>
+            </div>
+          </li>
+
+          <li class="g-step">
+            <span class="g-step__marker">{{ icon('box') }}</span>
+            <div class="g-step__body">
+              <p class="g-step__n">Step 4</p>
+              <h4>Supply the book</h4>
+              <div class="g-cards g-cards--2">
+                <div class="g-card g-card--flat">
+                  <h5>{{ icon('truck') }} Delivery orders</h5>
+                  <ol class="g-mini-steps">
+                    <li><span class="g-btnlabel">Mark out for delivery</span> when the rider leaves. Put rider details in the note.</li>
+                    <li><span class="g-btnlabel">Mark delivered</span> once it arrives.</li>
+                  </ol>
+                </div>
+                <div class="g-card g-card--flat">
+                  <h5>{{ icon('store') }} Pickup orders</h5>
+                  <ol class="g-mini-steps">
+                    <li><span class="g-btnlabel">Mark ready for pickup</span>. The buyer is emailed the store address.</li>
+                    <li><span class="g-btnlabel">Mark picked up</span> when they collect (ask for their order code).</li>
+                  </ol>
+                </div>
+              </div>
+              <p class="g-muted g-note">Each click emails the buyer automatically. <strong>Cancel order</strong> is available any time before supply.</p>
+            </div>
+          </li>
+        </ol>
+      </section>
+
+      {# ───────── Stages ───────── #}
+      <section class="g-section" id="stages">
+        <h2 class="g-h2">Order stages at a glance</h2>
+        <div class="g-flow">
+          <div class="g-flow__track">
+            {{ badge('pending_payment') }}<span class="g-flow__arrow">{{ icon('arrow') }}</span>
+            {{ badge('payment_submitted') }}<span class="g-flow__arrow">{{ icon('arrow') }}</span>
+            {{ badge('acknowledged') }}<span class="g-flow__arrow">{{ icon('arrow') }}</span>
+          </div>
+          <div class="g-flow__split">
+            <div class="g-flow__track"><span class="g-flow__lane">Delivery</span>{{ badge('dispatched') }}<span class="g-flow__arrow">{{ icon('arrow') }}</span>{{ badge('delivered') }}</div>
+            <div class="g-flow__track"><span class="g-flow__lane">Pickup</span>{{ badge('ready_for_pickup') }}<span class="g-flow__arrow">{{ icon('arrow') }}</span>{{ badge('picked_up') }}</div>
+          </div>
+        </div>
+        <p class="g-muted g-note">On <a href="/admin/orders">Orders</a>, the <strong>Needs action</strong> filter shows payments waiting for you. The red number on the Orders tab is how many.</p>
+      </section>
+
+      {# ───────── Show love ───────── #}
+      <section class="g-section" id="show-love">
+        <h2 class="g-h2">Show love gifts</h2>
+        <p class="g-lede">Selar doesn't tell the site who actually paid, so each name in <a href="/admin/supporters">Show love</a> is only "said they'd give" until you check.</p>
+        <div class="g-cards g-cards--3">
+          <div class="g-card g-card--flat"><span class="g-num">1</span><p>Visitor leaves their <strong>name &amp; email</strong>, then goes to Selar to give.</p></div>
+          <div class="g-card g-card--flat"><span class="g-num">2</span><p>Open <strong>Show love</strong> here and your <strong>Selar ShowLove dashboard</strong> side by side.</p></div>
+          <div class="g-card g-card--flat"><span class="g-num">3</span><p>Match each name, then decide:</p>
+            <p class="g-decide"><span class="g-tag g-tag--good">{{ icon('check') }} Gift found ({{ cfg.LAUNCH_GIFT_MINIMUM|naira }}+) → Thank</span></p>
+            <p class="g-decide"><span class="g-tag g-tag--muted">{{ icon('x') }} No gift → Dismiss</span></p>
+          </div>
+        </div>
+        {% if cfg.EBOOK_GIFT_DRIVE_LINK %}
+        <p class="g-ok">{{ icon('check') }} <strong>Thank</strong> sends a thank-you email with the Google Drive link to the ebook.</p>
+        {% else %}
+        <p class="g-warn">{{ icon('alert') }} <strong>Thank</strong> will send a thank-you without the ebook. Add <code>EBOOK_GIFT_DRIVE_LINK</code> to the settings to include it.</p>
+        {% endif %}
+      </section>
+
+      {# ───────── Ebook + waitlist ───────── #}
+      <section class="g-section" id="ebook">
+        <div class="g-cards g-cards--2">
+          <div class="g-card">
+            <span class="g-card__icon g-tone--blue">{{ icon('tablet') }}</span>
+            <h3>Ebook (after launch)</h3>
+            <p>Set <code>SALES_PHASE=regular</code> and <code>EBOOK_URL</code>, then restart. Selar takes the payment and delivers the ebook.</p>
+            <p class="g-tag g-tag--auto">Nothing to do on your side</p>
+          </div>
+          <div class="g-card">
+            <span class="g-card__icon g-tone--amber">{{ icon('map') }}</span>
+            <h3>People outside Lagos</h3>
+            <p>They can't order delivery yet, but they can leave their details. You get an email and they appear in <a href="/admin/waitlist">Waitlist</a>.</p>
+            <p class="g-tag g-tag--muted">Contact them if you expand delivery</p>
+          </div>
+        </div>
+      </section>
+
+      {# ───────── Routine ───────── #}
+      <section class="g-section" id="routine">
+        <h2 class="g-h2">Your daily routine</h2>
+        <div class="g-routine">
+          <a class="g-task" href="/admin">
+            <span class="g-task__n">1</span>
+            <span class="g-task__text"><strong>Overview</strong><small>A red banner shows payments to confirm</small></span>
+            <span class="g-task__go">{{ icon('arrow') }}</span>
+          </a>
+          <a class="g-task {{ 'has-count' if counts.to_confirm }}" href="/admin/orders?filter=action">
+            <span class="g-task__n">2</span>
+            <span class="g-task__text"><strong>Orders → Needs action</strong><small>Check each against your bank, then Acknowledge or Payment not found</small></span>
+            {% if counts.to_confirm %}<span class="g-task__count">{{ counts.to_confirm }} waiting</span>{% endif %}
+            <span class="g-task__go">{{ icon('arrow') }}</span>
+          </a>
+          <a class="g-task" href="/admin/orders?filter=supply">
+            <span class="g-task__n">3</span>
+            <span class="g-task__text"><strong>Orders → To supply</strong><small>Send out or set aside the books, then update their stage</small></span>
+            <span class="g-task__go">{{ icon('arrow') }}</span>
+          </a>
+          <a class="g-task {{ 'has-count' if counts.new_supporters }}" href="/admin/supporters">
+            <span class="g-task__n">4</span>
+            <span class="g-task__text"><strong>Show love</strong><small>Match new names against Selar, then Thank or Dismiss</small></span>
+            {% if counts.new_supporters %}<span class="g-task__count">{{ counts.new_supporters }} new</span>{% endif %}
+            <span class="g-task__go">{{ icon('arrow') }}</span>
+          </a>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</article>
+{% endblock %}

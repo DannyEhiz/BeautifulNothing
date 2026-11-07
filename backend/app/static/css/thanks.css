@@ -1,0 +1,142 @@
+/* Thank-you page (Selar redirects buyers and gifters here). Tokens come from styles.css. */
+
+.thanks {
+  min-height: 78svh;
+  display: grid;
+  align-items: center;
+  padding-block: 130px 120px;
+  overflow: hidden;
+  isolation: isolate;
+  text-align: center;
+}
+.thanks__inner { position: relative; z-index: 1; display: grid; justify-items: center; }
+.thanks__heart {
+  display: grid;
+  place-items: center;
+  width: 76px;
+  height: 76px;
+  margin-bottom: 22px;
+  border-radius: 50%;
+  background: rgba(215, 38, 47, 0.14);
+  box-shadow: 0 0 0 10px rgba(215, 38, 47, 0.06);
+  animation: beat 2.4s ease-in-out infinite;
+}
+.thanks__heart svg { width: 38px; height: 38px; fill: var(--red); }
+.thanks .eyebrow { justify-content: center; }
+/* Shared with the landing hero, whose phone layout reorders these. Keep this page's order. */
+.thanks .eyebrow,
+.thanks .hero__stories { order: 0; justify-self: center; }
+.thanks__title {
+  font-family: var(--f-display);
+  font-weight: 400;
+  font-size: clamp(5rem, 3rem + 10vw, 10rem);
+  line-height: 0.85;
+  text-shadow: 0 0 1px rgba(255, 255, 255, 0.5), 0 0 18px rgba(255, 255, 255, 0.06);
+  animation: chalk-in 1.4s var(--ease-out) both;
+}
+.thanks__stories { margin: 6px 0 0; }
+.thanks__lede {
+  max-width: 34ch;
+  margin-top: 46px;
+  font-size: clamp(1.2rem, 1rem + 0.8vw, 1.55rem);
+  line-height: 1.45;
+  color: var(--chalk-dim);
+  animation: rise 1s 0.8s var(--ease-out) both;
+}
+
+.thanks__grid { display: grid; grid-template-columns: 1.3fr 0.7fr; gap: clamp(32px, 6vw, 80px); align-items: center; }
+.thanks__h2 {
+  margin-bottom: 26px;
+  font-family: var(--f-serif);
+  font-size: clamp(1.9rem, 1.4rem + 1.8vw, 2.8rem);
+  font-weight: 400;
+  line-height: 1.1;
+}
+.next { display: grid; gap: 14px; padding: 0; list-style: none; }
+.next li {
+  display: grid;
+  grid-template-columns: 44px 1fr;
+  gap: 16px;
+  align-items: start;
+  padding: 18px 20px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.65);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.8) inset, 0 16px 30px -26px rgba(0, 0, 0, 0.5);
+}
+.next__n {
+  display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%;
+  background: var(--ink); color: var(--paper);
+  font-family: var(--f-display); font-size: 1.6rem; font-weight: 700;
+}
+.next strong { font-family: var(--f-sans); font-size: 1rem; font-weight: 600; }
+.next p { margin-top: 2px; color: var(--ink-dim); font-size: 1.02rem; }
+
+.thanks__note {
+  position: relative;
+  justify-self: center;
+  width: min(100%, 300px);
+  padding: 12px 12px 18px;
+  background: #fff;
+  rotate: 2.5deg;
+  box-shadow: 0 30px 50px -28px rgba(0, 0, 0, 0.6);
+}
+.thanks__note .note__tape { top: -12px; }
+.thanks__note img { aspect-ratio: 4 / 5; object-fit: cover; object-position: 50% 30%; }
+.thanks__note figcaption { padding-top: 12px; text-align: center; }
+.thanks__sign { font-family: var(--f-hand); font-size: 1.8rem; line-height: 1.1; color: var(--ink); }
+.thanks__role { font-family: var(--f-sans); font-size: 0.78rem; color: var(--ink-dim); }
+
+.thanks__share-inner { position: relative; z-index: 1; display: grid; justify-items: center; text-align: center; }
+.thanks__share .chalk-title { max-width: 16ch; }
+.share { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 30px; }
+.share__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 50px;
+  padding: 0.75em 1.4em;
+  border: 1.5px solid rgba(239, 237, 230, 0.3);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--chalk);
+  font: 500 0.92rem var(--f-sans);
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 0.25s var(--ease-out), border-color 0.2s, background 0.2s;
+}
+.share__btn svg { width: 20px; height: 20px; fill: currentColor; }
+.share__btn:hover { border-color: var(--chalk); background: rgba(239, 237, 230, 0.06); transform: translateY(-2px); }
+.share__btn--wa { border-color: transparent; background: #1fa855; color: #fff; }
+.share__btn--wa:hover { background: #178f47; border-color: transparent; }
+
+.thanks__paperback {
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  gap: 24px;
+  align-items: center;
+  width: min(100%, 620px);
+  margin-top: 56px;
+  padding: 22px 26px;
+  border: 1px solid rgba(239, 237, 230, 0.12);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.04);
+  text-align: left;
+}
+.thanks__paperback img { width: 110px; filter: drop-shadow(0 18px 24px rgba(0, 0, 0, 0.6)); rotate: -4deg; }
+.thanks__pb-title { font-family: var(--f-serif); font-size: 1.5rem; line-height: 1.2; }
+.thanks__pb-text { margin: 6px 0 16px; color: var(--chalk-dim); font-size: 1rem; }
+.thanks__home { margin-top: 34px; font-family: var(--f-sans); font-size: 0.86rem; }
+.thanks__home a { color: var(--chalk-dim); text-underline-offset: 3px; }
+
+@keyframes beat { 0%, 100% { scale: 1; } 12% { scale: 1.12; } 24% { scale: 1; } 36% { scale: 1.08; } 48% { scale: 1; } }
+
+@media (max-width: 760px) {
+  .thanks { min-height: auto; padding-block: 110px 100px; }
+  .thanks__grid { grid-template-columns: 1fr; }
+  .thanks__note { width: min(78%, 260px); }
+  .thanks__paperback { grid-template-columns: 76px 1fr; gap: 16px; padding: 18px; }
+  .thanks__paperback img { width: 76px; }
+  .thanks__paperback .btn { white-space: nowrap; padding-inline: 1.2em; }
+  .share__btn { flex: 1 1 100%; justify-content: center; }
+}
+@media (prefers-reduced-motion: reduce) { .thanks__heart { animation: none; } }
