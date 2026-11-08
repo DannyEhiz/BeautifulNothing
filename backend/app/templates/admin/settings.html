@@ -50,6 +50,32 @@
   <button class="btn btn--ink" data-busy="Saving…">Save settings</button>
 </form>
 
+<section class="panel" id="selar-redirects">
+  <h2 class="panel__title">Thank-you links for Selar</h2>
+  <p class="admin__intro">Paste these into Selar, in each product's settings where it asks for a redirect or “after purchase” link. After paying, buyers come back to your thank-you page instead of staying on Selar. You only need them when setting up a product, for example on a new Selar account.</p>
+  {% if not cfg.SITE_URL.startswith('https://') %}
+  <p class="form__error" role="alert">These links use <strong>{{ cfg.SITE_URL }}</strong>. Set <code>SITE_URL</code> on Render to the real address of the site (e.g. https://beautifulnothing.ladimeji-ramon.com.ng) before copying them.</p>
+  {% endif %}
+  <ul class="rows">
+    {% for label, note, source in [
+      ('Show love page', 'Paste into the ShowLove page settings on Selar', 'showlove'),
+      ('Ebook product', 'Paste into the ebook product settings on Selar', 'ebook')] %}
+    {% set link = cfg.SITE_URL ~ '/thank-you?from=' ~ source %}
+    <li class="row row--static">
+      <span class="row__main">
+        <span><strong>{{ label }}</strong></span>
+        <small class="row__link">{{ link }}</small>
+        <small>{{ note }}</small>
+      </span>
+      <span class="row__actions">
+        <button type="button" class="btn btn--sm btn--ink" data-copy="{{ link }}"><span>Copy link</span></button>
+        <a class="btn btn--sm btn--ghost-ink" href="{{ link }}" target="_blank" rel="noopener noreferrer">Preview ↗</a>
+      </span>
+    </li>
+    {% endfor %}
+  </ul>
+</section>
+
 <section class="panel" id="pickup">
   <h2 class="panel__title">Pickup locations</h2>
   <p class="admin__intro">Pickup buyers see these addresses on their order page and in their “Payment confirmed” and “Ready for pickup” emails. The short name appears on the landing page (“pick it up in …”).</p>
