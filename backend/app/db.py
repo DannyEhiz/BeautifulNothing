@@ -80,6 +80,17 @@ async def insert(table: str, row: dict) -> dict:
     return rows[0]
 
 
+async def upsert(table: str, rows: list[dict], on_conflict: str) -> list[dict]:
+    return await _request(
+        "POST", table, params=[("on_conflict", on_conflict)], json=rows,
+        prefer="resolution=merge-duplicates,return=representation",
+    )
+
+
+async def delete(table: str, where: dict) -> None:
+    await _request("DELETE", table, params=_filters(where))
+
+
 async def update(table: str, patch: dict, where: dict) -> list[dict]:
     """Returns the updated rows — an empty list means no row matched `where`."""
     return await _request("PATCH", table, params=_filters(where), json=patch, prefer="return=representation")

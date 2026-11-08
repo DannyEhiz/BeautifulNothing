@@ -15,7 +15,7 @@ import logging
 from collections.abc import Callable
 from datetime import datetime, timezone
 
-from . import config, db, emails, tokens
+from . import config, db, emails
 
 log = logging.getLogger(__name__)
 
@@ -77,10 +77,6 @@ async def get_by_code(code: str) -> dict | None:
     return await db.first("bn_orders", {"code": code.upper()})
 
 
-def ack_url(order: dict) -> str:
-    return f"{config.SITE_URL}/ack?token={tokens.make_action_token(order['id'], 'acknowledge')}"
-
-
 async def transition(
     order: dict,
     to: str,
@@ -113,7 +109,7 @@ async def transition(
     )
 
     if to == "payment_submitted":
-        defer(emails.admin_payment_submitted, updated, ack_url(updated))
+        defer(emails.admin_payment_submitted, updated)
     else:
         defer(emails.buyer_status_changed, updated, to)
     return updated

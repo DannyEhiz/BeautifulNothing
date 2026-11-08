@@ -6,7 +6,7 @@ from contextlib import asynccontextmanager, suppress
 from fastapi import BackgroundTasks, FastAPI, HTTPException, Request, Response
 from fastapi.staticfiles import StaticFiles
 
-from . import admin, config, db, site
+from . import admin, config, db, settings, site
 from .keepalive import keepalive_loop
 from .web import BASE, render
 
@@ -18,6 +18,7 @@ EVENT_TYPES = {"visit", "ebook_click", "showlove_click", "order_click"}
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
+    await settings.load()  # values saved in /admin → Settings override the environment
     if not config.ADMIN_EMAILS:
         log.warning("ADMIN_EMAILS is empty — order notifications won't be sent to anyone")
     # These are public links, safe to print — makes "button not going to Selar" easy to diagnose.
@@ -43,6 +44,14 @@ app = FastAPI(title="Beautiful Nothing", lifespan=lifespan, docs_url=None, redoc
 app.mount("/static", StaticFiles(directory=BASE / "static"), name="static")
 app.include_router(site.router)
 app.include_router(admin.router)
+
+
+@app.middleware("http")
+async def fresh_settings(request: Request, call_next):
+    # Saving in /admin applies at once; this re-reads every minute in case another server instance saved.
+    if not request.url.path.startswith("/static/"):
+        await settings.refresh_if_stale()
+    return await call_next(request)
 
 
 @app.exception_handler(db.NotConfigured)

@@ -13,9 +13,9 @@
   'pending_payment': 'Transfer the total to one of the accounts below, then tell us which account you paid from.',
   'payment_submitted': "Thanks! We're matching your transfer and will email you once it's confirmed.",
   'rejected': "We couldn't find your payment yet. Please check the transfer went through, then confirm your details again.",
-  'acknowledged': 'Payment confirmed! Your copy is being prepared.',
+  'acknowledged': 'Payment confirmed! Your copy is being prepared.' if order.fulfilment == 'delivery' else 'Payment confirmed! Collect your copy at the pickup point below, with your order number.',
   'dispatched': 'Your book is on its way. Keep your phone close; the rider may call.',
-  'ready_for_pickup': 'Your copy is ready. Bring your order number to the store.',
+  'ready_for_pickup': 'Your copy is ready. Bring your order number to the pickup point below.',
   'delivered': 'Delivered. Enjoy the stories!',
   'picked_up': 'Collected. Enjoy the stories!',
   'cancelled': 'This order was cancelled. Reply to any of our emails if this is unexpected.',
@@ -52,7 +52,7 @@
         <div><dt>Order</dt><dd>{{ order.code }}</dd></div>
         <div><dt>Copies</dt><dd>{{ order.quantity }}</dd></div>
         <div><dt>{{ 'Deliver to' if order.fulfilment == 'delivery' else 'Pickup at' }}</dt>
-          <dd>{% if order.fulfilment == 'delivery' %}{{ [order.address, order.area]|select|join(', ') }}{% else %}{{ cfg.PICKUP_STORE }}{% endif %}</dd></div>
+          <dd>{% if order.fulfilment == 'delivery' %}{{ [order.address, order.area]|select|join(', ') }}{% else %}{% for loc in cfg.PICKUP_LOCATIONS %}<span class="summary__place">{{ loc.address }}</span>{% else %}We'll send you the address{% endfor %}{% endif %}</dd></div>
         <div class="summary__total"><dt>Total</dt><dd>{{ order.total|naira }}</dd></div>
       </dl>
 
@@ -100,7 +100,7 @@
       </p>
       {% endif %}
 
-      <p class="form__fine">Keep this page's link (it's also in your email) to check on your order any time.</p>
+      <p class="form__fine">Bookmark this page to check on your order any time. You can also reopen it from <a href="/order/find">Find my order</a> with your order number ({{ order.code }}) and email.</p>
     </div>
   </div>
 </main>

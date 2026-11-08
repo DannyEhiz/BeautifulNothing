@@ -108,6 +108,21 @@
     if (d.hasAttribute('data-open-on-load')) d.showModal()
   })
 
+  // ───────── Show love: Selar opens in a new tab, this page stays put ─────────
+  const loveForm = $('[data-love-form]')
+  if (loveForm) {
+    loveForm.addEventListener('submit', () => {
+      // Let the browser send the form to the new tab first, then swap the dialog to a thank-you.
+      setTimeout(() => {
+        loveForm.hidden = true
+        $('[data-love-sent]').hidden = false
+        delete loveForm.dataset.submitting
+        const btn = $('button[data-busy]', loveForm)
+        if (btn) btn.textContent = 'Continue to Selar ↗'
+      }, 50)
+    })
+  }
+
   // ───────── "Coming soon" links (Selar link not live yet) ─────────
   $$('[data-soon]').forEach((a) =>
     a.addEventListener('click', (e) => {

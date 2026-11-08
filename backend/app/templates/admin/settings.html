@@ -1,0 +1,86 @@
+{% extends "admin/base.html" %}
+{% block admin %}
+<p class="admin__intro">Changes here take effect on the website straight away. No restart needed.</p>
+
+<form class="panel form" method="post" action="/admin/settings">
+  <fieldset class="choice">
+    <legend>Sales phase</legend>
+    {% for key, label, note in [
+      ('launch', 'Launch', 'The page leads with “Show love”. Gifters get the ebook as a thank-you.'),
+      ('regular', 'After launch', 'The page sells the ebook through the Selar product page.')] %}
+    <label class="choice__card">
+      <input type="radio" name="SALES_PHASE" value="{{ key }}" {% if values.SALES_PHASE == key %}checked{% endif %}>
+      <span class="choice__top"><span class="choice__label">{{ label }}</span>{% if cfg.SALES_PHASE == key %}<span class="badge badge--acknowledged">Live now</span>{% endif %}</span>
+      <span class="choice__note">{{ note }}</span>
+    </label>
+    {% endfor %}
+  </fieldset>
+
+  <h2 class="panel__title">Prices (₦)</h2>
+  <div class="form__grid form__grid--top">
+    <label class="field"><span>Paperback, delivered in Lagos</span>
+      <input name="PAPERBACK_DELIVERY_PRICE" required inputmode="numeric" value="{{ values.PAPERBACK_DELIVERY_PRICE }}"></label>
+    <label class="field"><span>Paperback, pickup</span>
+      <input name="PAPERBACK_PICKUP_PRICE" required inputmode="numeric" value="{{ values.PAPERBACK_PICKUP_PRICE }}"></label>
+    <label class="field"><span>Show love minimum (for the free ebook)</span>
+      <input name="LAUNCH_GIFT_MINIMUM" required inputmode="numeric" value="{{ values.LAUNCH_GIFT_MINIMUM }}"></label>
+    <label class="field"><span>Ebook price (after launch)</span>
+      <input name="EBOOK_PRICE" required inputmode="numeric" value="{{ values.EBOOK_PRICE }}">
+      <small>Only the price shown on the website. Change the real price on Selar too.</small></label>
+  </div>
+  <p class="form__fine">New prices apply to new orders. Orders already placed keep the price they were placed at.</p>
+
+  <h2 class="panel__title">Links</h2>
+  <div class="form__grid">
+    <label class="field field--wide"><span>Show love page on Selar</span>
+      <input name="SHOWLOVE_URL" type="url" placeholder="https://selar.com/showlove/…" value="{{ values.SHOWLOVE_URL }}">
+      <small>Empty = the button says it goes live very soon.</small></label>
+    <label class="field field--wide"><span>Ebook product on Selar</span>
+      <input name="EBOOK_URL" type="url" placeholder="https://selar.com/…" value="{{ values.EBOOK_URL }}"></label>
+    <label class="field field--wide"><span>Ebook gift (Google Drive)</span>
+      <input name="EBOOK_GIFT_DRIVE_LINK" type="url" placeholder="https://drive.google.com/file/d/…" value="{{ values.EBOOK_GIFT_DRIVE_LINK }}">
+      <small>Sent to Show love supporters when you click Thank. In Drive, share it as “Anyone with the link”.</small></label>
+  </div>
+
+  <h2 class="panel__title">Notifications</h2>
+  <label class="field"><span>Emails that get new order and payment alerts</span>
+    <textarea name="ADMIN_EMAILS" rows="2" required placeholder="you@example.com, partner@example.com">{{ values.ADMIN_EMAILS }}</textarea>
+    <small>Separate several addresses with commas.</small></label>
+
+  <button class="btn btn--ink" data-busy="Saving…">Save settings</button>
+</form>
+
+<section class="panel" id="pickup">
+  <h2 class="panel__title">Pickup locations</h2>
+  <p class="admin__intro">Pickup buyers see these addresses on their order page and in their “Payment confirmed” and “Ready for pickup” emails. The short name appears on the landing page (“pick it up in …”).</p>
+  <ul class="rows">
+    {% for loc in locations %}
+    <li class="row row--static {{ '' if loc.is_active else 'is-off' }}">
+      <span class="row__main">
+        <span><strong>{{ loc.name }}</strong></span>
+        <small>{{ loc.address }}</small>
+      </span>
+      <span class="row__actions">
+        <form method="post" action="/admin/settings/pickup/{{ loc.id }}/toggle">
+          <button class="btn btn--sm {{ 'btn--ghost-ink' if loc.is_active else 'btn--red' }}">{{ 'Hide from buyers' if loc.is_active else 'Show to buyers' }}</button>
+        </form>
+        <form method="post" action="/admin/settings/pickup/{{ loc.id }}/delete">
+          <button class="btn btn--sm btn--ghost-ink" data-confirm="Remove {{ loc.name }} for good?">Remove</button>
+        </form>
+      </span>
+    </li>
+    {% else %}
+    <li class="row row--static"><span class="row__main"><span>No pickup locations yet. Add one below.</span></span></li>
+    {% endfor %}
+  </ul>
+  <form class="form" method="post" action="/admin/settings/pickup">
+    <div class="form__grid">
+      <label class="field"><span>Short name</span>
+        <input name="name" required minlength="2" maxlength="80" placeholder="e.g. Opebi, Ikeja"></label>
+      <label class="field field--wide"><span>Full address</span>
+        <input name="address" required minlength="5" maxlength="300" placeholder="No 19, Fagbemi Street, Off Opebi Road, Ikeja, Lagos"></label>
+    </div>
+    <button class="btn btn--ink" data-busy="Adding…">Add pickup location</button>
+  </form>
+</section>
+{% endblock %}

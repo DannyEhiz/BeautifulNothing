@@ -6,7 +6,7 @@ from pathlib import Path
 from fastapi import Request
 from fastapi.templating import Jinja2Templates
 
-from . import config, orders
+from . import config, orders, settings
 
 BASE = Path(__file__).parent
 templates = Jinja2Templates(directory=BASE / "templates")
@@ -48,6 +48,7 @@ env.filters["date"] = fmt_date
 env.globals.update(
     cfg=config,
     torn_path=torn_path,
+    pickup_names=settings.pickup_names,
     STATUS_LABEL=orders.STATUS_LABEL,
     year=lambda: datetime.now(LAGOS).year,
 )

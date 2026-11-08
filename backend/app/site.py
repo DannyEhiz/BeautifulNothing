@@ -1,6 +1,8 @@
 """Public pages: landing, show love, paperback ordering, order status, and the admin email's acknowledge link."""
 
+import asyncio
 import logging
+import re
 import secrets
 from typing import Literal
 
@@ -206,6 +208,28 @@ async def join_waitlist(request: Request, background: BackgroundTasks):
     return render(request, "waitlist.html", done=True, form={})
 
 
+@router.get("/order/find")
+async def find_order_form(request: Request):
+    return render(request, "order_find.html", form={})
+
+
+@router.post("/order/find")
+async def find_order(request: Request):
+    data = await _form(request)
+    code = re.sub(r"\s", "", data.get("code", "")).upper()
+    if code and not code.startswith("BN-"):
+        code = "BN-" + code.removeprefix("BN")  # accept "BN0007" or "0007"
+    email = data.get("email", "").strip().lower()
+    order = await orders.get_by_code(code) if re.fullmatch(r"BN-\d{1,8}", code) and email else None
+    if not order or not secrets.compare_digest(order["email"].lower(), email):
+        await asyncio.sleep(1)  # slow down guessing
+        return render(
+            request, "order_find.html", status_code=404, form=data,
+            error_msg="We couldn't find an order with that number and email. Please check both and try again.",
+        )
+    return _see_other(f"/order/{order['code']}?t={order['access_token']}")
+
+
 async def _buyer_order(code: str, t: str) -> dict | None:
     order = await orders.get_by_code(code)
     # Same answer for "no such order" and "wrong token", so order codes can't be probed.
@@ -220,7 +244,9 @@ def _not_found(request: Request):
         "message.html",
         status_code=404,
         heading="Order not found",
-        text="We couldn't find that order. Please use the link in your order email.",
+        text="We couldn't find that order. You can look it up with your order number and email.",
+        link="/order/find",
+        link_label="Find my order",
     )
 
 

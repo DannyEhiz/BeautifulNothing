@@ -12,7 +12,7 @@
       <form method="post" action="/admin/logout" class="admin__logout"><button class="linkish">Sign out</button></form>
     </div>
     <nav class="wrap admin__tabs" aria-label="Admin sections">
-      {% for key, label, href in [('overview', 'Overview', '/admin'), ('orders', 'Orders', '/admin/orders'), ('supporters', 'Show love', '/admin/supporters'), ('waitlist', 'Waitlist', '/admin/waitlist'), ('banks', 'Bank accounts', '/admin/banks'), ('guide', 'Guide', '/admin/guide')] %}
+      {% for key, label, href in [('overview', 'Overview', '/admin'), ('orders', 'Orders', '/admin/orders'), ('supporters', 'Show love', '/admin/supporters'), ('waitlist', 'Waitlist', '/admin/waitlist'), ('banks', 'Bank accounts', '/admin/banks'), ('settings', 'Settings', '/admin/settings'), ('guide', 'Guide', '/admin/guide')] %}
       <a class="admin__tab {{ 'is-on' if tab == key }}" href="{{ href }}" {% if tab == key %}aria-current="page"{% endif %}>
         {{ label }}
         {% if key == 'orders' and counts.to_confirm %}<span class="pill">{{ counts.to_confirm }}</span>{% endif %}

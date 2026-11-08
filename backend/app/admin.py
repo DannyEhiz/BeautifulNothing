@@ -9,7 +9,7 @@ from urllib.parse import quote
 from fastapi import APIRouter, BackgroundTasks, Request
 from fastapi.responses import RedirectResponse
 
-from . import config, db, emails, orders, tokens
+from . import config, db, emails, orders, settings, tokens
 from .web import LAGOS, render
 
 router = APIRouter(prefix="/admin")
@@ -42,6 +42,10 @@ NOTICES = {
     "dismissed": "Supporter dismissed.",
     "bank_added": "Bank account added.",
     "bank_saved": "Bank account updated.",
+    "settings_saved": "Settings saved. The site is using them now.",
+    "pickup_added": "Pickup location added.",
+    "pickup_saved": "Pickup location updated.",
+    "pickup_removed": "Pickup location removed.",
 }
 
 
@@ -285,3 +289,62 @@ async def toggle_bank(request: Request, bank_id: int):
     if bank:
         await db.update("bn_bank_accounts", {"is_active": not bank["is_active"]}, {"id": bank_id})
     return _see_other("/admin/banks?n=bank_saved")
+
+
+# ───────────────────────── Settings (prices, sales phase, links, pickup locations) ─────────────────────────
+
+
+async def _settings_page(request: Request, status_code: int = 200, form: dict | None = None, **ctx):
+    locations = await db.select("bn_pickup_locations", order="sort_order")
+    page = await _page(
+        request, "admin/settings.html", "settings", values=form or settings.current(), locations=locations, **ctx
+    )
+    page.status_code = status_code
+    return page
+
+
+@router.get("/settings")
+async def settings_page(request: Request):
+    if not _is_admin(request):
+        return _to_login(request)
+    return await _settings_page(request)
+
+
+@router.post("/settings")
+async def save_settings(request: Request):
+    if not _is_admin(request):
+        return _to_login(request)
+    data = await _form(request)
+    error = await settings.save(data)
+    if error:
+        return await _settings_page(request, 422, form={**settings.current(), **data}, error_msg=error)
+    return _see_other("/admin/settings?n=settings_saved")
+
+
+@router.post("/settings/pickup")
+async def add_pickup(request: Request):
+    if not _is_admin(request):
+        return _to_login(request)
+    data = {k: (v or "").strip() for k, v in (await _form(request)).items()}
+    name, address = data.get("name", ""), data.get("address", "")
+    if len(name) < 2 or len(address) < 5:
+        return await _settings_page(request, 422, error_msg="Please give the pickup location a short name and its full address.")
+    existing = await db.select("bn_pickup_locations", columns="id")
+    await db.insert("bn_pickup_locations", {"name": name[:80], "address": address[:300], "sort_order": len(existing) + 1})
+    await settings.load()
+    return _see_other("/admin/settings?n=pickup_added#pickup")
+
+
+@router.post("/settings/pickup/{location_id}/{action}")
+async def pickup_action(request: Request, location_id: int, action: str):
+    if not _is_admin(request):
+        return _to_login(request)
+    location = await db.first("bn_pickup_locations", {"id": location_id})
+    if location and action == "toggle":
+        await db.update("bn_pickup_locations", {"is_active": not location["is_active"]}, {"id": location_id})
+    elif location and action == "delete":
+        await db.delete("bn_pickup_locations", {"id": location_id})
+    else:
+        return _see_other("/admin/settings#pickup")
+    await settings.load()
+    return _see_other(f"/admin/settings?n={'pickup_saved' if action == 'toggle' else 'pickup_removed'}#pickup")

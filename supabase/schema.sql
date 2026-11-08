@@ -117,6 +117,30 @@ create table if not exists public.bn_waitlist (
   created_at  timestamptz not null default now()
 );
 
+-- ───────────── Settings the admin changes in /admin → Settings (prices, phase, links…) ─────────────
+-- A missing key falls back to the value in the server's environment variables.
+create table if not exists public.bn_settings (
+  key         text primary key,
+  value       text not null,
+  updated_at  timestamptz not null default now()
+);
+
+-- ───────────── Where pickup buyers collect their copy (managed in /admin → Settings) ─────────────
+create table if not exists public.bn_pickup_locations (
+  id          bigint generated always as identity primary key,
+  name        text not null,          -- short, shown on the landing page, e.g. "Opebi, Ikeja"
+  address     text not null,          -- full address, sent to buyers
+  is_active   boolean not null default true,
+  sort_order  int not null default 0,
+  created_at  timestamptz not null default now()
+);
+
+insert into public.bn_pickup_locations (name, address, sort_order)
+select 'Opebi, Ikeja', 'No 19, Fagbemi Street, Off Opebi Road, Ikeja, Lagos, Nigeria', 1
+where not exists (select 1 from public.bn_pickup_locations);
+
+alter table public.bn_settings         enable row level security;
+alter table public.bn_pickup_locations enable row level security;
 alter table public.bn_events         enable row level security;
 alter table public.bn_bank_accounts  enable row level security;
 alter table public.bn_supporters     enable row level security;

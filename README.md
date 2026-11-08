@@ -26,7 +26,8 @@ images/               original images supplied by the author
 | Digital | **Show love**: visitor leaves name + email, then goes to Selar ShowLove. Admin matches names on Selar, then clicks **Thank** (sends thank-you + ebook link). | **Buy ebook**: straight to the Selar product page. Selar handles payment and delivery. |
 | Paperback | ₦12,000 delivered (Lagos only) or ₦10,000 pickup at the store. Paid by bank transfer. | same |
 
-Change the phase, prices and Selar links in `backend/.env` (no code changes needed).
+Change the phase, prices, Selar links, ebook gift link, notification emails and pickup locations in
+**/admin → Settings**. They apply immediately (stored in Supabase; the `.env` values are only the starting values).
 
 **After paying on Selar**, set Selar's redirect / "after purchase" link so buyers land on the thank-you page:
 
@@ -37,16 +38,16 @@ Change the phase, prices and Selar links in `backend/.env` (no code changes need
 
 ```text
 Buyer places order  ─► order code (BN-0001) + bank accounts       ✉ buyer: payment details   ✉ admin: new order
-Buyer taps "I've sent the money" (name + bank they paid from)      ✉ admin: what to look for + [Acknowledge order]
-Admin checks the bank alert, taps Acknowledge (email or /admin)    ✉ buyer: payment confirmed
+Buyer taps "I've sent the money" (name + bank they paid from)      ✉ admin: what to look for in the bank alert
+Admin checks the bank alert, taps Acknowledge in /admin            ✉ buyer: payment confirmed
 Admin: Mark out for delivery / ready for pickup                    ✉ buyer
 Admin: Mark delivered / picked up                                  ✉ buyer
 (side paths: Payment not found → buyer confirms again; Cancel)
 ```
 
-No screenshot upload: the buyer just says which account the money came from, and the admin confirms
-against the real bank alert. The email's Acknowledge button opens a confirmation page; nothing changes
-until it's confirmed there, so email scanners that pre-open links can't acknowledge orders by accident.
+No screenshot upload: the buyer says which account the money came from on their order page, and the
+admin confirms against the real bank alert. Emails have no buttons; buyers who closed their order page
+reopen it at `/order/find` with their order number and email. Admin actions happen in /admin.
 People outside Lagos can join a waitlist instead.
 
 ## Setup
@@ -69,9 +70,7 @@ added from /admin.
 | `SECRET_KEY` | Long random string (already generated in your local `.env`) |
 | `BREVO_API_KEY` | brevo.com → SMTP & API → API keys (free: 300 emails/day) |
 | `MAIL_FROM_EMAIL` | A sender verified in Brevo → Senders |
-| `PICKUP_STORE`, `PICKUP_AREA` | Store address (order pages) and short area name (landing page) |
-| `SALES_PHASE`, `SHOWLOVE_URL`, `EBOOK_URL` | Launch vs. after-launch, and the Selar links |
-| `EBOOK_GIFT_DRIVE_LINK` | Google Drive link to the ebook (sharing: "Anyone with the link", Viewer). Sent in the supporter thank-you email. |
+| `SALES_PHASE`, `SHOWLOVE_URL`, `EBOOK_URL`, prices, `EBOOK_GIFT_DRIVE_LINK` | Starting values only; change them later in /admin → Settings |
 
 Without Brevo the site still works and prints emails to the console instead of sending them.
 

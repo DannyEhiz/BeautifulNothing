@@ -88,7 +88,7 @@
         <img src="/static/img/book-3d.webp" alt="" width="487" height="863" loading="lazy">
         <div>
           <p class="thanks__pb-title">Want it on your shelf too?</p>
-          <p class="thanks__pb-text">The paperback is {{ cfg.PAPERBACK_DELIVERY_PRICE|naira }}, delivered anywhere in Lagos, or {{ cfg.PAPERBACK_PICKUP_PRICE|naira }} if you pick it up in {{ cfg.PICKUP_AREA }}.</p>
+          <p class="thanks__pb-text">The paperback is {{ cfg.PAPERBACK_DELIVERY_PRICE|naira }}, delivered anywhere in Lagos, or {{ cfg.PAPERBACK_PICKUP_PRICE|naira }} if you pick it up in {{ pickup_names() }}.</p>
           <a class="btn btn--red" href="/order" data-track="order_click">Order the paperback <span aria-hidden="true">→</span></a>
         </div>
       </div>

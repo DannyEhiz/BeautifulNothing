@@ -19,7 +19,7 @@
           <legend>How would you like to get it?</legend>
           {% for key, label, price, note in [
             ('delivery', 'Delivery', cfg.PAPERBACK_DELIVERY_PRICE, 'Anywhere in Lagos · delivery included'),
-            ('pickup', 'Pickup', cfg.PAPERBACK_PICKUP_PRICE, 'Collect at the store in ' ~ cfg.PICKUP_AREA)] %}
+            ('pickup', 'Pickup', cfg.PAPERBACK_PICKUP_PRICE, 'Collect in ' ~ pickup_names())] %}
           <label class="choice__card">
             <input type="radio" name="fulfilment" value="{{ key }}" {% if form.fulfilment == key %}checked{% endif %}>
             <span class="choice__top"><span class="choice__label">{{ label }}</span><span class="choice__price">{{ price|naira }}</span></span>
@@ -65,7 +65,7 @@
 
         {{ error(error_msg) }}
         <button class="btn btn--red btn--block" data-busy="Placing your order…">Place order &amp; see payment details</button>
-        <p class="form__fine">You'll pay by bank transfer on the next step.</p>
+        <p class="form__fine">You'll pay by bank transfer on the next step. Already ordered? <a href="/order/find">Find my order</a>.</p>
       </form>
     </div>
   </div>

@@ -50,7 +50,7 @@
         <span class="g-price__icon">{{ icon('store') }}</span>
         <span class="g-price__label">Paperback · pickup</span>
         <span class="g-price__value">{{ cfg.PAPERBACK_PICKUP_PRICE|naira }}</span>
-        <span class="g-price__note">{{ cfg.PICKUP_AREA }}</span>
+        <span class="g-price__note">{{ pickup_names() }}</span>
       </div>
       <div class="g-price">
         <span class="g-price__icon">{{ icon('heart') }}</span>
@@ -126,7 +126,7 @@
           <li><span class="g-journey__n">2</span><p>Enters name, phone, email (and address) and places the order</p></li>
           <li><span class="g-journey__n">3</span><p>Gets an order code like <span class="g-code">BN-0007</span> + your bank details</p></li>
           <li><span class="g-journey__n">4</span><p>Transfers the money with <span class="g-code">BN-0007</span> as narration</p></li>
-          <li><span class="g-journey__n">5</span><p>Taps <strong>"I've sent the money"</strong> with the payer's name &amp; bank</p></li>
+          <li><span class="g-journey__n">5</span><p>Taps <strong>"I've sent the money"</strong> on their order page with the payer's name &amp; bank</p></li>
         </ol>
 
         <h3 class="g-h3">What you do</h3>
@@ -146,7 +146,6 @@
                     <div><dt>From</dt><dd>ADEYEMI BOLA · Opay</dd></div>
                     <div><dt>Narration</dt><dd>BN-0007</dd></div>
                   </dl>
-                  <span class="g-fakebtn">Acknowledge order</span>
                 </div>
               </div>
             </div>
@@ -175,13 +174,13 @@
               <div class="g-outcomes">
                 <div class="g-outcome g-outcome--good">
                   <p class="g-outcome__when">{{ icon('check') }} Money is there, amount is right</p>
-                  <p class="g-outcome__do">Tap <strong>Acknowledge order</strong> in the email (then confirm), or <strong>Acknowledge payment</strong> on the order page.</p>
+                  <p class="g-outcome__do">Sign in here, open the order under <strong>Orders</strong> and tap <strong>Acknowledge payment</strong>.</p>
                   <p class="g-outcome__then">Buyer gets "Payment confirmed"</p>
                 </div>
                 <div class="g-outcome g-outcome--warn">
                   <p class="g-outcome__when">{{ icon('x') }} No matching payment</p>
                   <p class="g-outcome__do">Open the order and click <strong>Payment not found</strong>.</p>
-                  <p class="g-outcome__then">Buyer is asked to check and confirm again</p>
+                  <p class="g-outcome__then">Buyer is asked to check, then confirm again on their order page</p>
                 </div>
                 <div class="g-outcome g-outcome--bad">
                   <p class="g-outcome__when">{{ icon('alert') }} Wrong amount (e.g. underpaid)</p>
@@ -266,7 +265,7 @@
           <div class="g-card">
             <span class="g-card__icon g-tone--blue">{{ icon('tablet') }}</span>
             <h3>Ebook (after launch)</h3>
-            <p>Set <code>SALES_PHASE=regular</code> and <code>EBOOK_URL</code>, then restart. Selar takes the payment and delivers the ebook.</p>
+            <p>In <a href="/admin/settings">Settings</a>, choose <strong>After launch</strong> and make sure the ebook's Selar link is filled in. It switches straight away. Selar takes the payment and delivers the ebook.</p>
             <p class="g-tag g-tag--auto">Nothing to do on your side</p>
           </div>
           <div class="g-card">

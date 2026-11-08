@@ -69,14 +69,6 @@ def _layout(heading: str, body: str) -> str:
 </td></tr></table></body></html>"""
 
 
-def _button(url: str, label: str, color: str = "#d7262f") -> str:
-    return (
-        f'<p style="margin:24px 0"><a href="{escape(url)}" style="display:inline-block;background:{color};color:#fff;'
-        f'font-family:Arial,sans-serif;font-size:15px;font-weight:bold;text-decoration:none;padding:13px 24px;'
-        f'border-radius:999px">{escape(label)}</a></p>'
-    )
-
-
 def _rows(pairs: list[tuple[str, str]]) -> str:
     cells = "".join(
         f'<tr><td style="padding:7px 12px 7px 0;color:#777;font-family:Arial,sans-serif;font-size:13px;white-space:nowrap;vertical-align:top">{escape(k)}</td>'
@@ -114,10 +106,6 @@ def _bank_block(banks: list[dict], amount: int, code: str) -> str:
     )
 
 
-def order_link(order: dict) -> str:
-    return f"{config.SITE_URL}/order/{order['code']}?t={order['access_token']}"
-
-
 # ───────────────────────── Buyer emails ─────────────────────────
 
 
@@ -126,11 +114,34 @@ async def buyer_order_placed(order: dict, banks: list[dict]) -> None:
         f"<p>Hi {escape(order['name'])}, thank you for ordering <em>Beautiful Nothing</em>.</p>"
         f"{_order_rows(order)}"
         f"{_bank_block(banks, order['total'], order['code'])}"
-        f"<p>Once you've paid, tap the button below and tell us which account you paid from, so we can "
-        f"match your transfer quickly.</p>"
-        f"{_button(order_link(order), 'I have paid')}"
+        f"<p><strong>After paying:</strong> go back to your order page (it opened right after you ordered) and tap "
+        f"<strong>“I've sent the money”</strong>, then tell us the name and bank you paid from, so we can match "
+        f"your transfer quickly.</p>"
+        f"{_find_order_hint(order)}"
     )
     await send([order["email"]], f"Your order {order['code']} — payment details", _layout("Order received", body))
+
+
+def _find_order_hint(order: dict) -> str:
+    site = config.SITE_URL.split("://", 1)[-1]
+    return (
+        f'<p style="font-size:14px;color:#666">Closed that page? On {escape(site)}, open <strong>Find my order</strong> '
+        f"(at the bottom of every page) and enter <strong>{escape(order['code'])}</strong> with this email address.</p>"
+    )
+
+
+def _pickup_block() -> str:
+    places = config.PICKUP_LOCATIONS
+    if not places:
+        return "<p>We'll send you the pickup address shortly.</p>"
+    cards = "".join(
+        f'<div style="border:1px solid #e3e1da;border-radius:10px;padding:12px 14px;margin:8px 0">'
+        f'<div style="font-family:Arial,sans-serif;font-size:12px;color:#777;text-transform:uppercase;letter-spacing:1px">{escape(p["name"])}</div>'
+        f'<div style="font-size:16px;margin-top:2px">{escape(p["address"])}</div></div>'
+        for p in places
+    )
+    intro = "Pickup address:" if len(places) == 1 else "Pick it up at any of these places:"
+    return f"<p style=\"margin-bottom:4px\">{intro}</p>{cards}"
 
 
 BUYER_STATUS_COPY = {
@@ -138,9 +149,15 @@ BUYER_STATUS_COPY = {
         "Payment confirmed",
         "We've confirmed your payment for order {code}. Your copy is being prepared and we'll let you know as soon as it's on its way.",
     ),
+    "acknowledged_pickup": (
+        "Payment confirmed",
+        "We've confirmed your payment for order {code}. You can collect your copy at the pickup point below. "
+        "Please bring your order number, <strong>{code}</strong>.",
+    ),
     "rejected": (
         "We couldn't confirm your payment",
-        "We couldn't find a payment matching order {code}. Please check that the transfer went through, then confirm your payment details again, or reply to this email.",
+        "We couldn't find a payment matching order {code}. Please check that the transfer went through, then go back to "
+        "your order page and tap <strong>“I've sent the money”</strong> again with the name and bank you paid from.",
     ),
     "dispatched": (
         "Your book is on its way",
@@ -148,7 +165,7 @@ BUYER_STATUS_COPY = {
     ),
     "ready_for_pickup": (
         "Ready for pickup",
-        "Order {code} is ready. Come by the store with your order number to collect your copy:<br><strong>{store}</strong>",
+        "Order {code} is ready. Come by with your order number, <strong>{code}</strong>, to collect your copy.",
     ),
     "delivered": ("Delivered — enjoy the stories", "Order {code} has been delivered. Thank you for reading <em>Beautiful Nothing</em>."),
     "picked_up": ("Enjoy the stories", "Thanks for picking up order {code}. We hope <em>Beautiful Nothing</em> stays with you."),
@@ -157,16 +174,17 @@ BUYER_STATUS_COPY = {
 
 
 async def buyer_status_changed(order: dict, status: str) -> None:
-    copy = BUYER_STATUS_COPY.get(status)
+    pickup = order["fulfilment"] == "pickup"
+    copy = BUYER_STATUS_COPY.get(f"{status}_pickup" if pickup else status) or BUYER_STATUS_COPY.get(status)
     if not copy:
         return
     heading, text = copy
-    body = f"<p>Hi {escape(order['name'])},</p><p>{text.format(code=escape(order['code']), store=escape(config.PICKUP_STORE))}</p>"
+    body = f"<p>Hi {escape(order['name'])},</p><p>{text.format(code=escape(order['code']))}</p>"
+    if pickup and status in ("acknowledged", "ready_for_pickup"):
+        body += _pickup_block()
     body += _order_rows(order)
     if status == "rejected":
-        body += _button(order_link(order), "Confirm payment again")
-    else:
-        body += _button(order_link(order), "View your order", color="#121212")
+        body += _find_order_hint(order)
     await send([order["email"]], f"{heading} — {order['code']}", _layout(heading, body))
 
 
@@ -175,16 +193,15 @@ async def buyer_status_changed(order: dict, status: str) -> None:
 
 async def admin_new_order(order: dict) -> None:
     body = (
-        f"<p>Someone wants the paperback. Payment hasn't been made yet; you'll get another email with an "
-        f"<strong>Acknowledge</strong> button when they say they've paid.</p>"
+        f"<p>Someone wants the paperback. Payment hasn't been made yet; you'll get another email "
+        f"when they say they've paid.</p>"
         f"{_rows([('Name', order['name']), ('Phone', order['phone']), ('Email', order['email'])])}"
         f"{_order_rows(order)}"
-        f"{_button(config.SITE_URL + '/admin', 'Open admin', color='#121212')}"
     )
     await send(config.ADMIN_EMAILS, f"New paperback order {order['code']} — {naira(order['total'])}", _layout("New order", body))
 
 
-async def admin_payment_submitted(order: dict, ack_url: str) -> None:
+async def admin_payment_submitted(order: dict) -> None:
     body = (
         f"<p><strong>{escape(order['name'])}</strong> says they've paid for order <strong>{escape(order['code'])}</strong>. "
         f"Check your bank for this transfer before acknowledging:</p>"
@@ -197,8 +214,8 @@ async def admin_payment_submitted(order: dict, ack_url: str) -> None:
         ])
         + f"<p style=\"margin-top:18px\">Buyer: {escape(order['phone'])} · {escape(order['email'])}</p>"
         f"{_order_rows(order)}"
-        f"{_button(ack_url, 'Acknowledge order')}"
-        f'<p style="font-size:13px;color:#777">The button opens a confirmation page. Nothing changes until you confirm there.</p>'
+        f"<p>Once you've seen the money, sign in to the admin page on the website, open order "
+        f"<strong>{escape(order['code'])}</strong> under Orders and tap <strong>Acknowledge payment</strong>.</p>"
     )
     await send(config.ADMIN_EMAILS, f"Payment to confirm: {order['code']}, {naira(order['total'])}", _layout("Payment to confirm", body))
 
@@ -217,8 +234,8 @@ async def admin_waitlist(entry: dict) -> None:
 
 async def supporter_thanks(supporter: dict) -> None:
     book = (
-        f"<p>As a thank-you, here is your copy of the ebook:</p>{_button(config.EBOOK_GIFT_DRIVE_LINK, 'Download your ebook')}"
-        f'<p style="font-size:13px;color:#777">The link opens the book on Google Drive, where you can read it or download it.</p>'
+        f"<p>As a thank-you, here is your copy of the ebook on Google Drive, where you can read it or download it:</p>"
+        f'<p style="word-break:break-all">{escape(config.EBOOK_GIFT_DRIVE_LINK)}</p>'
         if config.EBOOK_GIFT_DRIVE_LINK
         else "<p>Your copy of the ebook will follow shortly.</p>"
     )

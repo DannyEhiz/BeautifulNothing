@@ -177,7 +177,7 @@
               <span class="option__label">Paperback</span>
               <span class="option__price">{{ cfg.PAPERBACK_DELIVERY_PRICE|naira }}</span>
             </header>
-            <p class="option__desc">Delivered to your door anywhere in Lagos, or {{ cfg.PAPERBACK_PICKUP_PRICE|naira }} if you pick it up in {{ cfg.PICKUP_AREA }}.</p>
+            <p class="option__desc">Delivered to your door anywhere in Lagos, or {{ cfg.PAPERBACK_PICKUP_PRICE|naira }} if you pick it up in {{ pickup_names() }}.</p>
             <a class="btn btn--red btn--block" href="/order" data-track="order_click">Order the paperback <span aria-hidden="true">→</span></a>
             <p class="option__note">Pay by bank transfer. Details on the next page.</p>
           </article>
@@ -201,7 +201,15 @@
       <button class="btn btn--ink btn--block" type="button" data-close-dialog>Close</button>
     </div>
     {% else %}
-    <form class="form" method="post" action="/show-love" data-track-submit="showlove_click">
+    {% if cfg.SHOWLOVE_URL %}
+    <div class="dialog__done" data-love-sent hidden>
+      <p>Selar has opened in a new tab. Please finish your gift there. Thank you for the love ❤</p>
+      <p class="form__fine">Didn't see it? <a href="{{ cfg.SHOWLOVE_URL }}" target="_blank" rel="noopener noreferrer">Open Selar again ↗</a></p>
+      <button class="btn btn--ink btn--block" type="button" data-close-dialog>Back to the page</button>
+    </div>
+    {% endif %}
+    <form class="form" method="post" action="/show-love" data-track-submit="showlove_click"
+          {% if cfg.SHOWLOVE_URL %}target="_blank" data-love-form{% endif %}>
       <p class="dialog__lede">
         Tell us who you are so the author can thank you personally. Gifts of
         <strong>{{ cfg.LAUNCH_GIFT_MINIMUM|naira }} or more</strong> come with the ebook as a thank-you. Next, you'll go

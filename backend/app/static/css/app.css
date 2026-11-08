@@ -49,6 +49,7 @@
 .form__grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 .field { display: grid; gap: 6px; }
 .field--wide { grid-column: 1 / -1; }
+.form__grid--top { align-items: start; }
 .field > span {
   font-family: var(--f-sans);
   font-size: 0.74rem;
@@ -194,6 +195,8 @@
 }
 .summary dt { font-family: var(--f-sans); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-dim); padding-top: 3px; }
 .summary dd { margin: 0; overflow-wrap: anywhere; }
+.summary__place { display: block; }
+.summary__place + .summary__place { margin-top: 6px; padding-top: 6px; border-top: 1px dashed rgba(22, 22, 22, 0.15); }
 .summary__total dd { font-family: var(--f-sans); font-size: 1.3rem; font-weight: 600; font-variant-numeric: tabular-nums; }
 
 .pay, .proof { display: grid; gap: 12px; margin-bottom: 26px; }
