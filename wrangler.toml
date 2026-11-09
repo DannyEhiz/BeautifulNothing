@@ -1,4 +1,0 @@
-name = "beautiful nothing python worker"
-main = "backend\main.py"
-compatibility_date = "2024-03-20"
-compatibility_flags = ["python_workers"]
