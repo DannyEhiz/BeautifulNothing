@@ -6,9 +6,13 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
+_source = os.getenv  # where values come from: the environment, or Cloudflare's env (see load_worker_env)
+
+
 def _env(name: str, default: str = "") -> str:
     # Tolerate values wrapped in quotes, e.g. PICKUP_STORE='No 19, ...'
-    return os.getenv(name, default).strip().strip("'\"").strip()
+    value = _source(name)
+    return str(value if value is not None else default).strip().strip("'\"").strip()
 
 
 def _emails(raw: str) -> list[str]:
@@ -29,48 +33,78 @@ def _link(raw: str) -> str:
     return raw if not raw or raw.startswith(("http://", "https://")) else "https://" + raw
 
 
-SUPABASE_URL = _supabase_url(_env("SUPABASE_URL"))
-SUPABASE_SERVICE_KEY = _env("SUPABASE_SERVICE_KEY")
+def load() -> None:
+    """Read every setting. Runs at import (environment / .env), and again on Cloudflare Workers once
+    the request's env is available (Workers don't put variables in the environment)."""
+    global SUPABASE_URL, SUPABASE_SERVICE_KEY, SITE_URL, KEEPALIVE_INTERVAL_SECONDS, ADMIN_EMAILS
+    global ADMIN_PASSWORD, SECRET_KEY, BREVO_API_KEY, MAIL_FROM_EMAIL, MAIL_FROM_NAME, MAIL_REPLY_TO
+    global PICKUP_STORE, PAPERBACK_DELIVERY_PRICE, PAPERBACK_PICKUP_PRICE, LAUNCH_GIFT_MINIMUM, EBOOK_PRICE
+    global PICKUP_AREA, PICKUP_LOCATIONS, EBOOK_GIFT_DRIVE_LINK, SALES_PHASE, SHOWLOVE_URL, EBOOK_URL
+    global SECURE_COOKIES
 
-SITE_URL = _env("SITE_URL", "http://localhost:8000").rstrip("/")
-KEEPALIVE_INTERVAL_SECONDS = int(_env("KEEPALIVE_INTERVAL_SECONDS", "3600"))
+    SUPABASE_URL = _supabase_url(_env("SUPABASE_URL"))
+    SUPABASE_SERVICE_KEY = _env("SUPABASE_SERVICE_KEY")
 
-ADMIN_EMAILS = _emails(_env("ADMIN_EMAILS"))
-ADMIN_PASSWORD = _env("ADMIN_PASSWORD")
-SECRET_KEY = _env("SECRET_KEY")
+    SITE_URL = _env("SITE_URL", "http://localhost:8000").rstrip("/")
+    KEEPALIVE_INTERVAL_SECONDS = int(_env("KEEPALIVE_INTERVAL_SECONDS", "3600"))
 
-BREVO_API_KEY = _env("BREVO_API_KEY")
-MAIL_FROM_EMAIL = _env("MAIL_FROM_EMAIL")
-MAIL_FROM_NAME = _env("MAIL_FROM_NAME", "Beautiful Nothing")
-# Where replies go (e.g. the author's personal inbox) when the sender address has no mailbox.
-MAIL_REPLY_TO = _env("MAIL_REPLY_TO")
+    ADMIN_EMAILS = _emails(_env("ADMIN_EMAILS"))
+    ADMIN_PASSWORD = _env("ADMIN_PASSWORD")
+    SECRET_KEY = _env("SECRET_KEY")
 
-# Everything from here to SHOWLOVE_URL/EBOOK_URL (plus ADMIN_EMAILS) is only the starting value:
-# the admin changes these in /admin → Settings, and the saved values replace them (see settings.py).
-PICKUP_STORE = _env("PICKUP_STORE")
-PAPERBACK_DELIVERY_PRICE = int(_env("PAPERBACK_DELIVERY_PRICE", "12000"))
-PAPERBACK_PICKUP_PRICE = int(_env("PAPERBACK_PICKUP_PRICE", "10000"))
-LAUNCH_GIFT_MINIMUM = int(_env("LAUNCH_GIFT_MINIMUM", "5000"))
-EBOOK_PRICE = int(_env("EBOOK_PRICE", "5000"))
-PICKUP_AREA = _env("PICKUP_AREA", "Opebi, Ikeja")
-# Pickup points: [{"name": short area, "address": full address}]. Replaced by the list managed in
-# /admin → Settings once it loads from the database.
-PICKUP_LOCATIONS = [{"name": PICKUP_AREA, "address": PICKUP_STORE}] if PICKUP_STORE else []
-# Google Drive link to the ebook file, sent in the thank-you email once a "show love" gift is confirmed.
-EBOOK_GIFT_DRIVE_LINK = _link(_env("EBOOK_GIFT_DRIVE_LINK"))
+    BREVO_API_KEY = _env("BREVO_API_KEY")
+    MAIL_FROM_EMAIL = _env("MAIL_FROM_EMAIL")
+    MAIL_FROM_NAME = _env("MAIL_FROM_NAME", "Beautiful Nothing")
+    # Where replies go (e.g. the author's personal inbox) when the sender address has no mailbox.
+    MAIL_REPLY_TO = _env("MAIL_REPLY_TO")
 
-# 'launch'  → landing page leads with "Show love" (gift on Selar ShowLove, ebook as thank-you).
-# 'regular' → after launch: landing page sells the ebook through the Selar product page.
-SALES_PHASE = _env("SALES_PHASE", "launch")
-# Selar links. Empty = button shows "coming soon" (clicks are still counted).
-SHOWLOVE_URL = _link(_env("SHOWLOVE_URL"))
-EBOOK_URL = _link(_env("EBOOK_URL"))
+    # Everything from here to SHOWLOVE_URL/EBOOK_URL (plus ADMIN_EMAILS) is only the starting value:
+    # the admin changes these in /admin → Settings, and the saved values replace them (see settings.py).
+    PICKUP_STORE = _env("PICKUP_STORE")
+    PAPERBACK_DELIVERY_PRICE = int(_env("PAPERBACK_DELIVERY_PRICE", "12000"))
+    PAPERBACK_PICKUP_PRICE = int(_env("PAPERBACK_PICKUP_PRICE", "10000"))
+    LAUNCH_GIFT_MINIMUM = int(_env("LAUNCH_GIFT_MINIMUM", "5000"))
+    EBOOK_PRICE = int(_env("EBOOK_PRICE", "5000"))
+    PICKUP_AREA = _env("PICKUP_AREA", "Opebi, Ikeja")
+    # Pickup points: [{"name": short area, "address": full address}]. Replaced by the list managed in
+    # /admin → Settings once it loads from the database.
+    PICKUP_LOCATIONS = [{"name": PICKUP_AREA, "address": PICKUP_STORE}] if PICKUP_STORE else []
+    # Google Drive link to the ebook file, sent in the thank-you email once a "show love" gift is confirmed.
+    EBOOK_GIFT_DRIVE_LINK = _link(_env("EBOOK_GIFT_DRIVE_LINK"))
 
-# Admin session cookie is HTTPS-only once the site runs on https.
-SECURE_COOKIES = SITE_URL.startswith("https://")
+    # 'launch'  → landing page leads with "Show love" (gift on Selar ShowLove, ebook as thank-you).
+    # 'regular' → after launch: landing page sells the ebook through the Selar product page.
+    SALES_PHASE = _env("SALES_PHASE", "launch")
+    # Selar links. Empty = button shows "coming soon" (clicks are still counted).
+    SHOWLOVE_URL = _link(_env("SHOWLOVE_URL"))
+    EBOOK_URL = _link(_env("EBOOK_URL"))
 
-if not SECRET_KEY:
-    # Fine for local dev, but sessions and email links break on every restart. Set it in production.
-    import secrets
+    # Admin session cookie is HTTPS-only once the site runs on https.
+    SECURE_COOKIES = SITE_URL.startswith("https://")
 
-    SECRET_KEY = secrets.token_urlsafe(48)
+
+load()
+
+_worker_env_loaded = False
+
+
+def load_worker_env(env) -> None:
+    """Cloudflare Workers: take the variables/secrets from the Worker's env (once per instance)."""
+    global _source, _worker_env_loaded
+    if _worker_env_loaded:
+        return
+    _worker_env_loaded = True
+    _source = lambda name: getattr(env, name, None)  # noqa: E731
+    load()
+
+
+def secret_key() -> str:
+    """SECRET_KEY, or a random one made on first use. Never made at import: Cloudflare Workers forbid
+    randomness while starting. A random key is fine for local dev, but sessions and email links break
+    on every restart, so set SECRET_KEY in production."""
+    global SECRET_KEY
+    if not SECRET_KEY:
+        import secrets
+
+        SECRET_KEY = secrets.token_urlsafe(48)
+    return SECRET_KEY

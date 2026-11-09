@@ -48,6 +48,9 @@ app.include_router(admin.router)
 
 @app.middleware("http")
 async def fresh_settings(request: Request, call_next):
+    # Cloudflare Workers hand over variables/secrets with the request, not in the environment.
+    if "env" in request.scope:
+        config.load_worker_env(request.scope["env"])
     # Saving in /admin applies at once; this re-reads every minute in case another server instance saved.
     if not request.url.path.startswith("/static/"):
         await settings.refresh_if_stale()
