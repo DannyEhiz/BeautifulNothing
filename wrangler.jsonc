@@ -1,0 +1,6 @@
+{
+  "name": "your-app-name",
+  "main": "backend/app/main.py",
+  "compatibility_date": "2026-11-09",
+  "compatibility_flags": ["python_workers"]
+}
