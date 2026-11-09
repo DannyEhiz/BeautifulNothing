@@ -2,6 +2,7 @@ import asyncio
 import json
 import logging
 from contextlib import asynccontextmanager, suppress
+from workers import asgi
 
 from fastapi import BackgroundTasks, FastAPI, HTTPException, Request, Response
 from fastapi.staticfiles import StaticFiles
@@ -113,3 +114,5 @@ async def health() -> dict:
     except Exception:
         db_ok = False
     return {"ok": True, "db": db_ok}
+
+Default = asgi.entrypoint(app)
