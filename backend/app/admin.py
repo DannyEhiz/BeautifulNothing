@@ -9,8 +9,8 @@ from urllib.parse import quote
 from fastapi import APIRouter, BackgroundTasks, Request
 from fastapi.responses import RedirectResponse
 
-from . import config, db, emails, orders, settings, tokens
-from .web import LAGOS, render
+from app import config, db, emails, orders, settings, tokens
+from app.web import LAGOS, render
 
 router = APIRouter(prefix="/admin")
 COOKIE = "bn_admin"

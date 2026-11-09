@@ -1,7 +1,7 @@
 import asyncio
 import logging
 
-from . import config, db
+from app import config, db
 
 log = logging.getLogger(__name__)
 

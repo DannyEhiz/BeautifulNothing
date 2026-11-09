@@ -6,9 +6,9 @@ from contextlib import asynccontextmanager, suppress
 from fastapi import BackgroundTasks, FastAPI, HTTPException, Request, Response
 from fastapi.staticfiles import StaticFiles
 
-from . import admin, config, db, settings, site
-from .keepalive import keepalive_loop
-from .web import BASE, render
+from app import admin, config, db, settings, site
+from app.keepalive import keepalive_loop
+from app.web import BASE, render
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
 log = logging.getLogger(__name__)
@@ -113,3 +113,19 @@ async def health() -> dict:
     except Exception:
         db_ok = False
     return {"ok": True, "db": db_ok}
+
+
+"""
+Render → New → Web Service → connect your GitHub repo.
+Fill in:
+Root directory: backend
+Runtime: Python
+Build command: pip install -r requirements.txt
+Start command: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+Under Environment Variables, click "Add from .env". Open your local backend/.env, copy everything, 
+paste it into that box and save. Render creates one variable per line, so you don't type them one by one.
+Add one more variable, PYTHON_VERSION = 3.12.7, so Render uses the same Python version you've been running locally.
+Click Create Web Service. It builds and gives you an address like https://beautiful-nothing.onrender.com.
+Update SITE_URL in Render's Environment Variables to that address. Your local .env points at localhost, 
+and email links and share buttons need the real address. Saving restarts the app automatically.
+"""

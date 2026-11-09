@@ -10,8 +10,8 @@ from fastapi import APIRouter, BackgroundTasks, Query, Request
 from fastapi.responses import RedirectResponse
 from pydantic import BaseModel, EmailStr, Field, ValidationError
 
-from . import config, content, db, emails, orders, tokens
-from .web import render
+from app import config, content, db, emails, orders, tokens
+from app.web import render
 
 log = logging.getLogger(__name__)
 router = APIRouter()

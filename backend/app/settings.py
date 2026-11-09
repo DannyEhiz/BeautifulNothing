@@ -11,7 +11,7 @@ import time
 from collections.abc import Callable
 from datetime import datetime, timezone
 
-from . import config, db
+from app import config, db
 
 log = logging.getLogger(__name__)
 

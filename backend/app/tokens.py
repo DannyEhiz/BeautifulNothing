@@ -1,6 +1,6 @@
 from itsdangerous import BadSignature, SignatureExpired, URLSafeTimedSerializer
 
-from . import config
+from app import config
 
 _admin = URLSafeTimedSerializer(config.SECRET_KEY, salt="bn-admin-session")
 _email_action = URLSafeTimedSerializer(config.SECRET_KEY, salt="bn-email-action")

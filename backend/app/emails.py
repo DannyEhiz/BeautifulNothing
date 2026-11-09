@@ -5,7 +5,7 @@ from html import escape
 
 import httpx
 
-from . import config
+from app import config
 
 log = logging.getLogger(__name__)
 

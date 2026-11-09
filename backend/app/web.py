@@ -6,7 +6,7 @@ from pathlib import Path
 from fastapi import Request
 from fastapi.templating import Jinja2Templates
 
-from . import config, orders, settings
+from app import config, orders, settings
 
 BASE = Path(__file__).parent
 templates = Jinja2Templates(directory=BASE / "templates")
