@@ -7,7 +7,11 @@ from workers import asgi
 from fastapi import BackgroundTasks, FastAPI, HTTPException, Request, Response
 from fastapi.staticfiles import StaticFiles
 
-from . import admin, config, db, settings, site
+import admin
+import config
+import db
+import settings
+import site
 from .keepalive import keepalive_loop
 from .web import BASE, render
 
